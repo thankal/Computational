@@ -10,6 +10,22 @@ public class network {
         System.out.println("Backpropagation");
     }
 
+    private float logistic(x){
+        return 1.0/(1+exp(-x));
+    }
+
+    private float logistic_prime(x){
+        return logistic(x)*(1-logistic(x));
+    }
+
+    private float tangent(x){
+        return (exp(x)-exp(-x))/(exp(x)+exp(-x));
+    }
+
+    private float tangent_prime(x){
+        return 1-(tangent(x)*tangent(x));
+    }
+
     /**
      * @param args the command line arguments
      */
