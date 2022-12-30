@@ -1,4 +1,5 @@
 package exercise1;
+import java.lang.Math;
 
 public class network {
 
@@ -37,19 +38,19 @@ public class network {
         System.out.println("Backpropagation");
     }
 
-    private float logistic(x){
-        return 1.0/(1+exp(-x));
+    private double logistic(double x){
+        return 1.0/(1+Math.exp(-x));
     }
 
-    private float logistic_prime(x){
+    private double logistic_prime(double x){
         return logistic(x)*(1-logistic(x));
     }
 
-    private float tangent(x){
-        return (exp(x)-exp(-x))/(exp(x)+exp(-x));
+    private double tangent(double x){
+        return (Math.exp(x)-Math.exp(-x))/(Math.exp(x)+Math.exp(-x));
     }
 
-    private float tangent_prime(x){
+    private double tangent_prime(double x){
         return 1-(tangent(x)*tangent(x));
     }
 
