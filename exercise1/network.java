@@ -152,7 +152,7 @@ public class network {
             case 2:
                 return tangent(x);
             default:
-                return logistic(x);
+                return relu(x);
         }
     }
 
@@ -171,6 +171,15 @@ public class network {
 
     private double tangent_prime(double x){
         return 1-(tangent(x)*tangent(x));
+    }
+
+    private double relu(double x){
+        if(x>0){
+            return x;
+        }else{
+            return 0;
+        }
+
     }
 
     /**
