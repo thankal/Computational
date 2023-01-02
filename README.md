@@ -5,7 +5,7 @@ Computational Inteligence mye035 project 2022-23
 - [X] Feedforward implementation
 - [X] Initialize random weights
 - [X] Implementation of activation functions
-- [ ] Implementation of relu derivative function
+- [X] Implementation of relu derivative function
 - [ ] Backpropagation implementation
 - [X] Examples generator script
 - [ ] Load Training Data function
