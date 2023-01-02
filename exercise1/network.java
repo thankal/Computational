@@ -182,6 +182,17 @@ public class network {
 
     }
 
+    private double relu_prime(double x){
+        if(x>0){
+            return 1;
+        }else{
+            return 0;
+        }
+    
+            
+        
+    }
+
     /**
      * @param args the command line arguments
      */
