@@ -28,8 +28,11 @@ public class network {
 
 
 
-    // The weights of the network (for each of the 3 layers)
+    // The weights of the network (for each layer)
     private ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
+
+    // The biases of the network (for each layer)
+    private ArrayList<ArrayList<Double>> biases = new ArrayList<ArrayList<Double>>();
 
     // The total input of each neuron
     private ArrayList<ArrayList<Double>> totalInputs = new ArrayList<ArrayList<Double>>();
@@ -58,89 +61,80 @@ public class network {
     // initialize the weights with random values in the range [-1,1]
     private void initRandomWeights() {
         // add a random value for each weight of the first hidden layer
+        ArrayList<Double> temp = new ArrayList<Double>(K);
         for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
-            ArrayList<Double> temp = new ArrayList<Double>(K);
-            for (int j = 0; j <= d; j++) {
+            for (int j = 0; j < d; j++) {
                 // generate a random double between -1 and 1
                 temp.add((Math.random()*2-1));
             }
-            weights.add(temp);
+            biases.get(0).add(Math.random()*2-1);
         }
+        weights.add(temp);
 
         // add a random value for each weight of the second hidden layer
+        temp = new ArrayList<Double>(K);
         for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
-            ArrayList<Double> temp = new ArrayList<Double>(K);
-            for (int j = 0; j <= NUM_OF_H_NEURONS[0]; j++) {
+            for (int j = 0; j < NUM_OF_H_NEURONS[0]; j++) {
                 temp.add((Math.random()*2-1));
             }
-            weights.add(temp);
+            biases.get(1).add(Math.random()*2-1);
         }
+        weights.add(temp);
 
         // add a random value for each weight of the third hidden layer
+        temp = new ArrayList<Double>(K);
         for (int i = 0; i < NUM_OF_H_NEURONS[2]; i++) {
-            ArrayList<Double> temp = new ArrayList<Double>(K);
-            for (int j = 0; j <= NUM_OF_H_NEURONS[1]; j++) {
+            for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
                 temp.add((Math.random()*2-1));
             }
-            weights.add(temp);
+            biases.get(2).add(Math.random()*2-1);
         }
+        weights.add(temp);
 
         // add a random value for each weight of the output layer
+        temp = new ArrayList<Double>(K);
         for (int i = 0; i < K; i++) {
-            ArrayList<Double> temp = new ArrayList<Double>(K);
-            for (int j = 0; j <= NUM_OF_H_NEURONS[2]; j++) {
+            for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
                 temp.add((Math.random()*2-1));
             }
-            weights.add(temp);
+            biases.get(3).add(Math.random()*2-1);
         }
+        weights.add(temp);
         
     }
 
-    private ArrayList<Double> feedforward(ArrayList<Double> inputs, int d, int K) {
+    private ArrayList<Double> forwardPass(ArrayList<Double> inputs, int d, int K) {
         ArrayList<Double> outputs = new ArrayList<Double>(K);
 
         // add the inputs to the input layer activations
         activations.add(inputs);
 
-        // calculate the activations of the first hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
-            // iterate through the inputs
-            for (int j = 1; j <= d; j++) {
-                // calculate the activation
-                double z = activations.get(0).get(j-1) * weights.get(0).get(j) + weights.get(0).get(0);
+        // TODO: fix the indexing with h for all layers
+        // calculate the activations of the hidden layers (H1, H2, H3)
+        for (int h = 0; h<3; h++) {
+            for (int i = 0; i < NUM_OF_H_NEURONS[h]; i++) {
+                // iterate through the inputs
+                double z = 0; // initialize temp for calculating total input of one neuron
+                for (int j = 0; j <= d; j++) {
+                    // calculate the activation
+                    z += activations.get(h).get(j) * weights.get(h).get(j);
+                }
+                // add the bias to the total input after all input (activations*weights) have been taken into account
+                z += biases.get(h).get(i); 
+                totalInputs.get(h).set(i, z); // update the table
+
                 double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
-                activations.get(1).set(i, new_activation);
+                activations.get(1).set(i, new_activation); // update the table
             }
         }
 
-        // calculate the activations of the second hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
-            // iterate through the inputs
-            for (int j = 1; j <= NUM_OF_H_NEURONS[0]; j++) {
-                // calculate the activation
-                double z = activations.get(1).get(j-1) * weights.get(1).get(j) + weights.get(1).get(0);
-                double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
-                activations.get(2).set(i, new_activation);
-            }
-        }
-
-        // calculate the activations of the third hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[2]; i++) {
-            // iterate through the inputs
-            for (int j = 1; j <= NUM_OF_H_NEURONS[1]; j++) {
-                // calculate the activation
-                double z = activations.get(2).get(j-1) * weights.get(2).get(j) + weights.get(2).get(0);
-                double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
-                activations.get(3).set(i, new_activation);
-            }
-        }
 
         // calculate the activations of the output layer
         for (int i = 0; i < K; i++) {
             // iterate through the inputs
             for (int j = 1; j <= NUM_OF_H_NEURONS[2]; j++) {
                 // calculate the activation
-                double z = activations.get(3).get(j-1) * weights.get(3).get(j) + weights.get(3).get(0);
+                double z = activations.get(3).get(j) * weights.get(3).get(j) + biases.get(3).get(i);
                 double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
                 activations.get(4).set(i, new_activation);
             }
@@ -150,12 +144,12 @@ public class network {
         return outputs;
     }
 
-    private void backpropagation(ArrayList<Double> inputs, int d, ArrayList<Double> desiredOutputs, int K) {
+    private void backPropagation(ArrayList<Double> inputs, int d, ArrayList<Double> desiredOutputs, int K) {
 
         // calculate deltas for output layer
         for (int i = 0; i < K; i++) {
             double delta = (desiredOutputs.get(i) - activations.get(4).get(i)) * activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(4).get(i));
-            deltas.get(5).set(i, delta);
+            deltas.get(4).set(i, delta);
         }
 
         // calculate deltas for third hidden layer
@@ -165,7 +159,7 @@ public class network {
                 delta += deltas.get(4).get(j) * weights.get(3).get(j+1);
             }
             delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(3).get(i));
-            deltas.get(4).set(i, delta);
+            deltas.get(3).set(i, delta);
         }
 
         // calculate deltas for second hidden layer
@@ -175,7 +169,7 @@ public class network {
                 delta += deltas.get(3).get(j) * weights.get(2).get(j+1);
             }
             delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(2).get(i));
-            deltas.get(3).set(i, delta);
+            deltas.get(2).set(i, delta);
         }
 
         // calculate deltas for first hidden layer
@@ -185,7 +179,7 @@ public class network {
                 delta += deltas.get(2).get(j) * weights.get(1).get(j+1);
             }
             delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(1).get(i));
-            deltas.get(2).set(i, delta);
+            deltas.get(1).set(i, delta);
         }
 
 
@@ -197,9 +191,10 @@ public class network {
         for (int i=0; i<3 ; i++) {
             for (int j=0; j<NUM_OF_H_NEURONS[i]; j++) {
                 for (int k=0; k<NUM_OF_H_NEURONS[i+1]; k++) {
-                    double delta = deltas.get(i+2).get(k) * activations.get(i+1).get(j);
-                    partialDerivativesWeights.get(i).set(j+1, partialDerivativesWeights.get(i).get(j+1) + delta);
-                    partialDerivativesBiases.get(i).set(j+1, partialDerivativesBiases.get(i).get(j+1) + delta);
+                    double delta = deltas.get().get(k) * activations.get(i+1).get(j);
+
+                    partialDerivativesWeights.get(i).set(j+1, activations.get(i).get(j+1) * delta);
+                    partialDerivativesBiases.get(i).set(j+1, delta);
                 }
             }
         }
