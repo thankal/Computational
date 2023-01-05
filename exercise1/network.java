@@ -189,60 +189,60 @@ public class network {
         // calculate deltas for output layer
         for (int i = 0; i < K; i++) {
             double delta = (desiredOutputs.get(i) - activations.get(4).get(i)) * activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(4).get(i));
-            deltas.get(4).set(i, delta);
+            deltas.get(3).set(i, delta);
         }
 
         // calculate deltas for third hidden layer
         for (int i = 0; i < NUM_OF_H_NEURONS[2]; i++) {
             double delta = 0;
             for (int j = 0; j < K; j++) {
-                delta += deltas.get(4).get(j) * weights.get(3).get(j+1);
+                delta += deltas.get(3).get(j) * weights.get(3).get(j+1);
             }
             delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(3).get(i));
-            deltas.get(3).set(i, delta);
+            deltas.get(2).set(i, delta);
         }
 
         // calculate deltas for second hidden layer
         for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
             double delta = 0;
             for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
-                delta += deltas.get(3).get(j) * weights.get(2).get(j+1);
+                delta += deltas.get(2).get(j) * weights.get(2).get(j+1);
             }
             delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(2).get(i));
-            deltas.get(2).set(i, delta);
+            deltas.get(1).set(i, delta);
         }
 
         // calculate deltas for first hidden layer
         for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
             double delta = 0;
             for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
-                delta += deltas.get(2).get(j) * weights.get(1).get(j+1);
+                delta += deltas.get(1).get(j) * weights.get(1).get(j+1);
             }
             delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(1).get(i));
-            deltas.get(1).set(i, delta);
+            deltas.get(0).set(i, delta);
         }
 
 
-        // * calculating partial derivatives *
+        // * calculating partial derivatives (biases and weights)*
 
-
-        // TODO: 
         // calculate partial derivatives for Hidden layers 
-        for (int i=0; i<3 ; i++) {
-            for (int j=0; j<NUM_OF_H_NEURONS[i]; j++) {
-                for (int k=0; k<NUM_OF_H_NEURONS[i+1]; k++) {
-                    double delta = deltas.get().get(k) * activations.get(i+1).get(j);
+        for (int h=0; h<3 ; h++) {
+            for (int j=0; j<NUM_OF_H_NEURONS[h]; j++) {
+                double delta = deltas.get(h).get(j);
 
-                    partialDerivativesWeights.get(i).set(j+1, activations.get(i).get(j+1) * delta);
-                    partialDerivativesBiases.get(i).set(j+1, delta);
-                }
+                partialDerivativesWeights.get(h).set(j, activations.get(h).get(j) * delta);
+                partialDerivativesBiases.get(h).set(j, delta);
             }
         }
 
-       // TODO: calculate partial derivatives for output layer
-       
-       // TODO: calculate totalInputs in forwardpass
+       // calculate partial derivatives for output layer
+        for (int j=0; j<K; j++) {
+            double delta = deltas.get(3).get(j);
 
+            partialDerivativesWeights.get(3).set(j, activations.get(3).get(j) * delta);
+            partialDerivativesBiases.get(3).set(j, delta);
+        }
+       
 
 
 
