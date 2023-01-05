@@ -270,7 +270,7 @@ public class network {
                 weights.get(2).set(j+1, weights.get(2).get(j+1) + LEARNING_RATE * delta);
             }
         }
-
+ 
         // update weights for first hidden layer
         for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
             for (int j = 0; j < inputs.size(); j++) {
@@ -282,7 +282,22 @@ public class network {
 
     }
 
+    //update weights 
+    private void updateWeights(){
+        double temp = 0;
+        for(int i=0; i<weights.size(); i++){
+            for(int j=0; j<weights.get(i).size(); j++){
+                temp = weights.get(i).get(j)- LEARNING_RATE *  partialDerivativesWeights.get(i).get(j);
+                weights.get(i).set(j,temp);
+            }  
 
+        }
+
+       
+
+    }
+        
+    }
     // run the user specified activation function
     private double activationFunction(int type, double x) {
         switch (type) {
