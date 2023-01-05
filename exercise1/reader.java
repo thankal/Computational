@@ -6,22 +6,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class reader {
+public class Reader {
     
     // final list of 2 lists, each with 4000 elements
-    private static ArrayList<ArrayList> xList = new ArrayList<ArrayList>(2);
+    private ArrayList<ArrayList<Float>> xList = new ArrayList<ArrayList<Float>>();
     
-    //Constructor
-    public reader(ArrayList<ArrayList> xList){
-        this.xList = xList;
-    }
-
-    // Getter for xList
-    public static ArrayList<ArrayList> getList(){
-        return xList;
-    }
-
-    public static void main(String[] args){
+    public static ArrayList<ArrayList<Float>> readFile(){
 
         int c;
         String st;
@@ -33,9 +23,11 @@ public class reader {
     
         ArrayList<Float> x1List = new ArrayList<Float>();
         ArrayList<Float> x2List = new ArrayList<Float>();
-        
+        ArrayList<Float> categoryList = new ArrayList<Float>();
+        ArrayList<ArrayList<Float>> xList = new ArrayList<ArrayList<Float>>();
+
         try{
-            File file = new File("data.txt");
+            File file = new File("training_data.txt");
             BufferedReader br = new BufferedReader(new FileReader(file));
 
             while ((line = br.readLine()) != null) {
@@ -84,16 +76,55 @@ public class reader {
 
             }
             br.close();
-            reader.getList().add(x1List);
-            reader.getList().add(x2List);
-            System.out.println(reader.getList());
+            xList.add(x1List);
+            xList.add(x2List);
+            System.out.println(xList);
+            
+            
 
         }
         catch (IOException e){
             e.printStackTrace();
         }
 
+        try{
+            File file2 = new File("training_data.txt");
+            BufferedReader br2 = new BufferedReader(new FileReader(file2));
+            float f2 = 0;
+
+            line = br2.readLine();
+            while ((line = br2.readLine()) != null){
+                //read last 2 characters of the line and add them to the category list
+                String category = line.substring(line.length() - 2);
+                if (category.equals("1 ")){
+                    f2 = 1.0f;
+                }
+                else if (category.equals("2 ")){
+                    f2 = 2.0f;
+                }
+                else if (category.equals("3 ")){
+                    f2 = 3.0f;
+                }
+                System.out.println(category);
+                categoryList.add(f2);
+            }
+            br2.close();
+            
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+        xList.add(categoryList);
+        System.out.println(xList);
+        return xList;
+
         
 
+    }
+
+    public static void main(String[] args) {
+        readFile();
     }
 }
