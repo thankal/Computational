@@ -106,38 +106,78 @@ public class network {
     private ArrayList<Double> forwardPass(ArrayList<Double> inputs, int d, int K) {
         ArrayList<Double> outputs = new ArrayList<Double>(K);
 
-        // add the inputs to the input layer activations
-        activations.add(inputs);
-
-        // TODO: fix the indexing with h for all layers
-        // calculate the activations of the hidden layers (H1, H2, H3)
-        for (int h = 0; h<3; h++) {
-            for (int i = 0; i < NUM_OF_H_NEURONS[h]; i++) {
-                // iterate through the inputs
-                double z = 0; // initialize temp for calculating total input of one neuron
-                for (int j = 0; j <= d; j++) {
-                    // calculate the activation
-                    z += activations.get(h).get(j) * weights.get(h).get(j);
-                }
-                // add the bias to the total input after all input (activations*weights) have been taken into account
-                z += biases.get(h).get(i); 
-                totalInputs.get(h).set(i, z); // update the table
-
-                double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
-                activations.get(1).set(i, new_activation); // update the table
-            }
+        // set the input activations
+        for (int i = 0; i < d; i++) {
+            activations.get(0).set(i, inputs.get(i));
         }
 
 
+        // calculate the activations of the first hidden layer (H1)
+        for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
+            // for each neuron
+            // iterate through its inputs
+            double z = 0; // initialize temp for calculating total input of one neuron
+            for (int j = 0; j <= d; j++) {
+                // calculate the activation
+                z += activations.get(0).get(j) * weights.get(0).get(j);
+            }
+            // add the bias to the total input after all input (activations*weights) have been taken into account
+            z += biases.get(0).get(i); 
+            totalInputs.get(0).set(i, z); // update the table
+
+            double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
+            activations.get(1).set(i, new_activation); // update the table
+        }
+
+        // calculate the activations of the second hidden layer (H2)
+        for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
+            // for each neuron
+            // iterate through its inputs
+            double z = 0; // initialize temp for calculating total input of one neuron
+            for (int j = 0; j <= NUM_OF_H_NEURONS[0]; j++) {
+                // calculate the activation
+                z += activations.get(1).get(j) * weights.get(1).get(j);
+            }
+            // add the bias to the total input after all input (activations*weights) have been taken into account
+            z += biases.get(1).get(i); 
+            totalInputs.get(1).set(i, z); // update the table
+
+            double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
+            activations.get(2).set(i, new_activation); // update the table
+        }
+
+        // calculate the activations of the third hidden layer (H3)
+        for (int i = 0; i < NUM_OF_H_NEURONS[2]; i++) {
+            // for each neuron
+            // iterate through its inputs
+            double z = 0; // initialize temp for calculating total input of one neuron
+            for (int j = 0; j <= NUM_OF_H_NEURONS[1]; j++) {
+                // calculate the activation
+                z += activations.get(2).get(j) * weights.get(2).get(j);
+            }
+            // add the bias to the total input after all input (activations*weights) have been taken into account
+            z += biases.get(2).get(i); 
+            totalInputs.get(2).set(i, z); // update the table
+
+            double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
+            activations.get(3).set(i, new_activation); // update the table
+        }
+
         // calculate the activations of the output layer
         for (int i = 0; i < K; i++) {
-            // iterate through the inputs
-            for (int j = 1; j <= NUM_OF_H_NEURONS[2]; j++) {
+            // for each neuron
+            // iterate through its inputs
+            double z = 0; // initialize temp for calculating total input of one neuron
+            for (int j = 0; j <= NUM_OF_H_NEURONS[2]; j++) {
                 // calculate the activation
-                double z = activations.get(3).get(j) * weights.get(3).get(j) + biases.get(3).get(i);
-                double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
-                activations.get(4).set(i, new_activation);
+                z += activations.get(3).get(j) * weights.get(3).get(j);
             }
+            // add the bias to the total input after all input (activations*weights) have been taken into account
+            z += biases.get(3).get(i); 
+            totalInputs.get(3).set(i, z); // update the table
+
+            double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
+            activations.get(4).set(i, new_activation); // update the table
         }
 
         outputs = activations.get(4); // the activations of the output neurons
