@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.sound.sampled.BooleanControl.Type;
+
 public class Reader {
     
     // final list of 2 lists, each with 4000 elements
     private ArrayList<ArrayList<Double>> xList = new ArrayList<ArrayList<Double>>();
     
-    public static ArrayList<ArrayList<Double>> readFile(String type){
+    public static ArrayList<ArrayList<Double>> readFile(String filename){
 
         int c;
         String st;
@@ -28,7 +30,7 @@ public class Reader {
         ArrayList<ArrayList<Double>> xList = new ArrayList<ArrayList<Double>>();
 
         try{
-            File file = new File(type);
+            File file = new File(filename);
 
             BufferedReader br = new BufferedReader(new FileReader(file));  
 
@@ -88,7 +90,7 @@ public class Reader {
         }
 
         try{
-            File file2 = new File("training_data.txt");
+            File file2 = new File(filename);
             BufferedReader br2 = new BufferedReader(new FileReader(file2));
             Double d2 = 0.0;
 
@@ -105,7 +107,7 @@ public class Reader {
                 else if (category.equals("3 ")){
                     d2 = 3.0;
                 }
-                System.out.println(category);
+                
                 categoryList.add(d2);
             }
             br2.close();
@@ -123,7 +125,7 @@ public class Reader {
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Please choose a file to read(training.txt, experiment.txt): ");
+        System.out.println("Please choose a file to read(training_data.txt, experiment_data.txt): ");
         String type = sc.nextLine();
         readFile(type);
 
