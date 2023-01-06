@@ -338,10 +338,34 @@ public class Network {
             partialDerivativesBiases.get(3).set(j, delta);
         }
         
+        
 
     }
 
+    // update weights 
+    private void updateWeights(ArrayList<ArrayList<Double>> partialDerivativesWeights){
+        double temp = 0;
+        for(int i=0; i<weights.size(); i++){
+            for(int j=0; j<weights.get(i).size(); j++){
+                temp = weights.get(i).get(j) - LEARNING_RATE *  partialDerivativesWeights.get(i).get(j);
+                weights.get(i).set(j,temp);
+            }  
 
+        }   
+
+    }
+
+    // update biases 
+    private void updateBiases(ArrayList<ArrayList<Double>> partialDerivativesBiases){
+        double newValue = 0;
+        for(int i=0; i<biases.size(); i++){
+            for(int j=0; j<biases.get(i).size(); j++){
+                newValue = biases.get(i).get(j) - LEARNING_RATE * partialDerivativesBiases.get(i).get(j);
+                biases.get(i).set(j,newValue);
+        }
+    }
+        
+    }
     // run the user specified activation function
     private double activationFunction(int type, double x) {
         switch (type) {
