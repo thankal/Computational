@@ -242,59 +242,30 @@ public class network {
             partialDerivativesWeights.get(3).set(j, activations.get(3).get(j) * delta);
             partialDerivativesBiases.get(3).set(j, delta);
         }
-       
-
-
-
-        /*
-        // update weights for output layer
-        for (int i = 0; i < K; i++) {
-            for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
-                double delta = deltas.get(4).get(i) * activations.get(3).get(j);
-                weights.get(4).set(j+1, weights.get(4).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
-
-        // update weights for third hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[2]; i++) {
-            for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
-                double delta = deltas.get(3).get(i) * activations.get(2).get(j);
-                weights.get(3).set(j+1, weights.get(3).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
-
-        // update weights for second hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
-            for (int j = 0; j < NUM_OF_H_NEURONS[0]; j++) {
-                double delta = deltas.get(2).get(i) * activations.get(1).get(j);
-                weights.get(2).set(j+1, weights.get(2).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
- 
-        // update weights for first hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
-            for (int j = 0; j < inputs.size(); j++) {
-                double delta = deltas.get(1).get(i) * inputs.get(j);
-                weights.get(1).set(j+1, weights.get(1).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
-        */
+        
 
     }
 
     //update weights 
-    private void updateWeights(){
+    private void updateWeights(ArrayList<ArrayList<Double>> partialDerivativesWeights){
         double temp = 0;
         for(int i=0; i<weights.size(); i++){
             for(int j=0; j<weights.get(i).size(); j++){
-                temp = weights.get(i).get(j)- LEARNING_RATE *  partialDerivativesWeights.get(i).get(j);
+                temp = weights.get(i).get(j) - LEARNING_RATE *  partialDerivativesWeights.get(i).get(j);
                 weights.get(i).set(j,temp);
             }  
 
+        }   
+
+    }
+
+    private void updateBiases(ArrayList<ArrayList<Double>> partialDerivativesBiases){
+        double newValue = 0;
+        for(int i=0; i<biases.size(); i++){
+            for(int j=0; j<biases.get(i).size(); j++){
+                newValue = biases.get(i).get(j) - LEARNING_RATE * partialDerivativesBiases.get(i).get(j);
+                biases.get(i).set(j,newValue);
         }
-
-       
-
     }
         
     }
