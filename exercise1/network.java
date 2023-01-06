@@ -2,7 +2,7 @@ package exercise1;
 import java.lang.Math;
 import java.util.ArrayList;
 
-public class network {
+public class Network {
 
     // Number of inputs
     private int d = 2;
@@ -18,15 +18,6 @@ public class network {
 
     // Type of activation function
     private int ACTIVATION_FUNCTION_TYPE = 1;
-
-    
-    // The input vector
-    private ArrayList<Double> inputs = new ArrayList<Double>(d);
-
-    // The output vector
-    private ArrayList<Double> outputs = new ArrayList<Double>(K);
-
-
 
     // The weights of the network (for each layer)
     private ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
@@ -53,7 +44,14 @@ public class network {
     // Partial derivatives for each bias
     private ArrayList<ArrayList<Double>> partialDerivativesBiases = new ArrayList<ArrayList<Double>>();
 
+    // The size of the mini-batch
+    private int B = 10;
 
+    // the lists for the x1, x2 and Category values from the file load
+    private ArrayList<Double> x1List = new ArrayList<Double>();
+    private ArrayList<Double> x2List = new ArrayList<Double>();
+    private ArrayList<Double> categoryList = new ArrayList<Double>();
+    
 
 
 
@@ -103,12 +101,109 @@ public class network {
         
     }
 
-    private ArrayList<Double> forwardPass(ArrayList<Double> inputs, int d, int K) {
+
+    private void loadInputs() {
+        final ArrayList<ArrayList<Double>> temp = Reader.readFile("data.txt");
+
+        // initialize the input lists
+        x1List = temp.get(0);
+        x2List = temp.get(1);
+        categoryList = temp.get(2);
+    }
+
+
+    public void gradientDecentAlgorithm() {
+        ArrayList<Double> input = new ArrayList<Double>(d);
+
+        // Serial update
+        if (B == 1) {
+            // for each input
+            for (int t = 0; t < x1List.size(); t++) {
+                // initialize the input vector and the desired output 
+                input.clear();
+                input.add(x1List.get(t));
+                input.add(x2List.get(t));
+                desiredOutputs.add(categoryList.get(t));
+
+                // forward pass
+                forwardPass(input, d, K);
+
+                // backward pass
+                backPropagation(input, d, desiredOutputs, K);
+
+                // .. now that we have calculated the partial derivatives update the weights and biases
+                updateWeights(partialDerivativesWeights);
+                updateBiases(partialDerivativesBiases);
+            }
+        }
+
+        // Group update
+        else {
+            // calculate the number of mini-batches
+            final int miniBatchNum = x1List.size() / B;
+            final int remainingInputs = x1List.size() % B;
+            
+            // for each mini-batch
+            for (int t = 0; t < miniBatchNum; t++) {
+                // initialize sums of partial derivatives
+                ArrayList<ArrayList<Double>> sumOfPartialDerivativesWeights = new ArrayList<ArrayList<Double>>();
+                ArrayList<ArrayList<Double>> sumOfPartialDerivativesBiases = new ArrayList<ArrayList<Double>>();
+                
+                
+                // for each input in the mini-batch
+                for (int n = 0; n < B; n++) {
+                    // prepare the input vector and the desired output 
+                    input.clear();
+                    input.add(x1List.get(n));
+                    input.add(x2List.get(n));
+                    desiredOutputs.add(categoryList.get(n));
+                    
+                    // forward pass
+                    forwardPass(input, d, K);
+
+                    // backward pass
+                    backPropagation(input, d, desiredOutputs, K);
+
+                    // .. now that we have calculated the partial derivatives add them to the sums
+                    // for weights
+                    for (int i = 0; i < partialDerivativesWeights.size(); i++) {
+                        for (int j = 0; j < partialDerivativesWeights.get(i).size(); j++) {
+                            sumOfPartialDerivativesWeights.get(i).set(j, sumOfPartialDerivativesWeights.get(i).get(j) + partialDerivativesWeights.get(i).get(j));
+                        }
+                    }
+
+                    // for biases
+                    for (int i = 0; i < partialDerivativesBiases.size(); i++) {
+                        for (int j = 0; j < partialDerivativesBiases.get(i).size(); j++) {
+                            sumOfPartialDerivativesBiases.get(i).set(j, sumOfPartialDerivativesBiases.get(i).get(j) + partialDerivativesBiases.get(i).get(j));
+                        }
+                    }
+
+                }
+                    
+                // the epoch has ended, now update the weights and biases
+                updateWeights(sumOfPartialDerivativesWeights);
+                updateBiases(sumOfPartialDerivativesBiases);
+            }
+
+            // for the last batch of remaining inputs (if any)
+            for (int i = 0; i < remainingInputs; i++) {
+                // forward pass
+                forwardPass(input, d, K);
+
+                // backward pass
+                backPropagation(input, i, desiredOutputs, i);
+            }
+        }
+
+    }
+
+    private ArrayList<Double> forwardPass(ArrayList<Double> input, int d, int K) {
         ArrayList<Double> outputs = new ArrayList<Double>(K);
 
         // set the input activations
         for (int i = 0; i < d; i++) {
-            activations.get(0).set(i, inputs.get(i));
+            activations.get(0).set(i, input.get(i));
         }
 
 
@@ -184,7 +279,7 @@ public class network {
         return outputs;
     }
 
-    private void backPropagation(ArrayList<Double> inputs, int d, ArrayList<Double> desiredOutputs, int K) {
+    private void backPropagation(ArrayList<Double> input, int d, ArrayList<Double> desiredOutputs, int K) {
 
         // calculate deltas for output layer
         for (int i = 0; i < K; i++) {
@@ -242,43 +337,7 @@ public class network {
             partialDerivativesWeights.get(3).set(j, activations.get(3).get(j) * delta);
             partialDerivativesBiases.get(3).set(j, delta);
         }
-       
-
-
-
-        /*
-        // update weights for output layer
-        for (int i = 0; i < K; i++) {
-            for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
-                double delta = deltas.get(4).get(i) * activations.get(3).get(j);
-                weights.get(4).set(j+1, weights.get(4).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
-
-        // update weights for third hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[2]; i++) {
-            for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
-                double delta = deltas.get(3).get(i) * activations.get(2).get(j);
-                weights.get(3).set(j+1, weights.get(3).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
-
-        // update weights for second hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
-            for (int j = 0; j < NUM_OF_H_NEURONS[0]; j++) {
-                double delta = deltas.get(2).get(i) * activations.get(1).get(j);
-                weights.get(2).set(j+1, weights.get(2).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
-
-        // update weights for first hidden layer
-        for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
-            for (int j = 0; j < inputs.size(); j++) {
-                double delta = deltas.get(1).get(i) * inputs.get(j);
-                weights.get(1).set(j+1, weights.get(1).get(j+1) + LEARNING_RATE * delta);
-            }
-        }
-        */
+        
 
     }
 
