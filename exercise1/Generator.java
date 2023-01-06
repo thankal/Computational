@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.lang.Math;
 import java.io.IOException;
 
-public class generator {
+public class Generator {
     public static void main(String[] args){
         Random rand = new Random();
         
