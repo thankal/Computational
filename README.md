@@ -13,4 +13,5 @@ Computational Inteligence mye035 project 2022-23
 - [ ] Total Trainning error calculation in gradient decent algorithm and print
 - [ ] Add the termination condition for the gradient decent algorithm
 - [ ] Implement run function (calculate generalization percentage)
+- [ ] Report with diagrams and tables with execution statistics
 
