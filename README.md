@@ -9,6 +9,7 @@ Computational Inteligence mye035 project 2022-23
 - [X] Backpropagation implementation
 - [X] Examples generator script
 - [X] Load Training Data function
+- [ ] Update Weights and biases function
 - [ ] Implementation of Generalization percentage (evaluation function)
 - [ ] Implementation of the Training error calculation at the end of an epoch
 - [ ] Implementation of the main function and the termination condition
