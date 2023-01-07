@@ -106,6 +106,7 @@ public class Network {
 
 
     private void loadInputs() {
+        // TODO: what filename?
         final ArrayList<ArrayList<Double>> temp = Reader.readFile("data.txt");
 
         // initialize the input lists
@@ -171,6 +172,9 @@ public class Network {
         ArrayList<ArrayList<Double>> desiredOutputVectors = new ArrayList<ArrayList<Double>>();
         ArrayList<ArrayList<Double>> actualOutputVectors = new ArrayList<ArrayList<Double>>();
         ArrayList<Double> totalErrors = new ArrayList<Double>();
+
+        // randomize weights
+        initRandomWeights();
 
         // Serial update
         if (B == 1) {
@@ -273,7 +277,8 @@ public class Network {
                 input.add(x1List.get(miniBatchNum*B + n));
                 input.add(x2List.get(miniBatchNum*B + n));
                 desiredOutputVectors.clear();
-                desiredOutputVectors.add(expectedOutputVectors.get(t*B + n));
+                final ArrayList<Double> desiredOutputVector = expectedOutputVectors.get(miniBatchNum*B + n);
+                desiredOutputVectors.add(desiredOutputVector);
                 
                 // forward pass
                 actualOutputVectors.clear();
@@ -282,7 +287,7 @@ public class Network {
                 actualOutputVectors.add(outputVector);
 
                 // backward pass
-                backPropagation(input, d, outputVector, K);
+                backPropagation(input, d, desiredOutputVector, K);
 
                 // .. now that we have calculated the partial derivatives add them to the sums
                 // for weights
@@ -480,7 +485,7 @@ public class Network {
         
     }
 
-    private void CalculateOverallError(ArrayList<ArrayList<Double>>actualOutputVectors,ArrayList<ArrayList<Double>>desiredOutputVectors){
+    private double calculateTotalError(ArrayList<ArrayList<Double>>actualOutputVectors, ArrayList<ArrayList<Double>>desiredOutputVectors){
         double OverallError=0;
         for(int i=0; i<actualOutputVectors.size();i++){
             for(int j=0; j<K; j++){
@@ -489,6 +494,8 @@ public class Network {
         }
         return OverallError;    
     }
+
+
     // run the user specified activation function
     private double activationFunction(int type, double x) {
         switch (type) {
@@ -552,10 +559,6 @@ public class Network {
     }
 
 
-    // results stores the final list of the outputs of the network
-    private ArrayList<ArrayList<Double>> results = new ArrayList<ArrayList<Double>>();
-    // outputs temporarily stores the outputs of the network
-    private ArrayList<Double> outputs = new ArrayList<Double>(); 
 
     //find the max index of the outputs 
     public int findMax(ArrayList<Double> outputs){
@@ -571,6 +574,14 @@ public class Network {
 
 
     public Double run(){
+        // results stores the final list of the outputs of the network
+        ArrayList<ArrayList<Double>> results = new ArrayList<ArrayList<Double>>();
+        // outputs temporarily stores the outputs of the network
+        ArrayList<Double> outputs = new ArrayList<Double>(); 
+
+        // load the inputs from the file
+        loadInputs();
+
         // array to store the inputs from loadInputs()
         ArrayList<Double> inputs = new ArrayList<Double>(2);
         
