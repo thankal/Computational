@@ -1,6 +1,7 @@
 package exercise1;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Network {
 
@@ -28,8 +29,10 @@ public class Network {
     // The total input of each neuron
     private ArrayList<ArrayList<Double>> totalInputs = new ArrayList<ArrayList<Double>>();
 
+    /* reduntant? TODO: remove
     // The desired outputs
     private ArrayList<Double> desiredOutputs = new ArrayList<Double>();
+    */
 
     // The activation of each neuron
     private ArrayList<ArrayList<Double>> activations = new ArrayList<ArrayList<Double>>();
@@ -50,7 +53,7 @@ public class Network {
     // the lists for the x1, x2 and Category values from the file load
     private ArrayList<Double> x1List = new ArrayList<Double>();
     private ArrayList<Double> x2List = new ArrayList<Double>();
-    private ArrayList<Double> categoryList = new ArrayList<Double>();
+    private ArrayList<ArrayList<Double>> expectedOutputVectors = new ArrayList<ArrayList<Double>>();
     
 
 
@@ -108,12 +111,66 @@ public class Network {
         // initialize the input lists
         x1List = temp.get(0);
         x2List = temp.get(1);
-        categoryList = temp.get(2);
+
+        // categorize each point to a category (C1, C2, or C3)
+        ArrayList<Double> expectedOutputVector;
+        int category = 0;
+        for (int i = 0; i < x1List.size(); i++) {
+            // get the x1 and x2 values
+            double x1 = x1List.get(i);
+            double x2 = x2List.get(i);
+
+            // determine category
+            if (Math.pow((x1-0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2>0.5){
+                category = 1;
+            }
+            else if(Math.pow((x1-0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2<0.5){
+                category = 2;
+            }
+            else if(Math.pow((x1+0.5),2) + Math.pow((x2+0.5),2) < 0.2 && x2>-0.5){
+                category = 1;
+            }
+            else if(Math.pow((x1+0.5),2) + Math.pow((x2+0.5),2) < 0.2 && x2<-0.5){
+                category = 2;
+            }
+            else if(Math.pow((x1-0.5),2) + Math.pow(x2+0.5,2) <0.2 && x2>-0.5){
+                category = 1;
+            }
+            else if(Math.pow((x1-0.5),2) + Math.pow((x2+0.5),2) <0.2 && x2<-0.5){
+                category = 2;
+            }
+            else if(Math.pow((x1+0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2>0.5){
+                category = 1;
+            }
+            else if(Math.pow((x1+0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2<0.5){
+                category = 2;
+            }
+            else{
+                category = 3;
+            }
+
+            // encode the category as a vector
+            if (category == 1){
+                expectedOutputVector = new ArrayList<Double>(Arrays.asList(1.0, 0.0, 0.0));
+            }
+            else if (category == 2){
+                expectedOutputVector = new ArrayList<Double>(Arrays.asList(0.0, 1.0, 0.0));
+            }
+            else{
+                expectedOutputVector = new ArrayList<Double>(Arrays.asList(0.0, 0.0, 1.0));
+            }
+
+            // add the expected output vector to the list of desired output vectors
+            expectedOutputVectors.add(expectedOutputVector);
+        }
     }
 
 
     public void gradientDecentAlgorithm() {
         ArrayList<Double> input = new ArrayList<Double>(d);
+        ArrayList<ArrayList<Double>> desiredOutputVectors = new ArrayList<ArrayList<Double>>();
+        ArrayList<ArrayList<Double>> actualOutputVectors = new ArrayList<ArrayList<Double>>();
+        ArrayList<Double> totalErrors = new ArrayList<Double>();
 
         // Serial update
         if (B == 1) {
@@ -123,18 +180,28 @@ public class Network {
                 input.clear();
                 input.add(x1List.get(t));
                 input.add(x2List.get(t));
-                desiredOutputs.add(categoryList.get(t));
+                desiredOutputVectors.clear();
 
+                final ArrayList<Double> desiredOutputVector = expectedOutputVectors.get(t);
+                desiredOutputVectors.add(desiredOutputVector);
+                
                 // forward pass
-                forwardPass(input, d, K);
+                actualOutputVectors.clear();
+                final ArrayList<Double> outputVector;
+                outputVector = forwardPass(input, d, K);
+                actualOutputVectors.add(outputVector);
 
                 // backward pass
-                backPropagation(input, d, desiredOutputs, K);
+                backPropagation(input, d, desiredOutputVector, K);
 
                 // .. now that we have calculated the partial derivatives update the weights and biases
                 updateWeights(partialDerivativesWeights);
                 updateBiases(partialDerivativesBiases);
+
+                // calculate the total error for the epoch
+                totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
             }
+
         }
 
         // Group update
@@ -145,7 +212,7 @@ public class Network {
             
             // for each mini-batch
             for (int t = 0; t < miniBatchNum; t++) {
-                // initialize sums of partial derivatives
+                // initialize sums of partial derivatives (for the epoch)
                 ArrayList<ArrayList<Double>> sumOfPartialDerivativesWeights = new ArrayList<ArrayList<Double>>();
                 ArrayList<ArrayList<Double>> sumOfPartialDerivativesBiases = new ArrayList<ArrayList<Double>>();
                 
@@ -154,15 +221,20 @@ public class Network {
                 for (int n = 0; n < B; n++) {
                     // prepare the input vector and the desired output 
                     input.clear();
-                    input.add(x1List.get(n));
-                    input.add(x2List.get(n));
-                    desiredOutputs.add(categoryList.get(n));
+                    input.add(x1List.get(t*B + n));
+                    input.add(x2List.get(t*B + n));
+                    desiredOutputVectors.clear();
+                    final ArrayList<Double> desiredOutputVector = expectedOutputVectors.get(t*B + n);
+                    desiredOutputVectors.add(desiredOutputVector);
                     
                     // forward pass
-                    forwardPass(input, d, K);
+                    actualOutputVectors.clear();
+                    final ArrayList<Double> outputVector;
+                    outputVector = forwardPass(input, d, K);
+                    actualOutputVectors.add(outputVector);
 
                     // backward pass
-                    backPropagation(input, d, desiredOutputs, K);
+                    backPropagation(input, d, desiredOutputVector, K);
 
                     // .. now that we have calculated the partial derivatives add them to the sums
                     // for weights
@@ -184,16 +256,57 @@ public class Network {
                 // the epoch has ended, now update the weights and biases
                 updateWeights(sumOfPartialDerivativesWeights);
                 updateBiases(sumOfPartialDerivativesBiases);
+
+                // calculate the total error for the epoch
+                totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
             }
+
 
             // for the last batch of remaining inputs (if any)
-            for (int i = 0; i < remainingInputs; i++) {
+            // initialize sums of partial derivatives (for the epoch)
+            ArrayList<ArrayList<Double>> sumOfPartialDerivativesWeights = new ArrayList<ArrayList<Double>>();
+            ArrayList<ArrayList<Double>> sumOfPartialDerivativesBiases = new ArrayList<ArrayList<Double>>();
+            for (int n = 0; n < remainingInputs; n++) {
+
+                // prepare the input vector and the desired output 
+                input.clear();
+                input.add(x1List.get(miniBatchNum*B + n));
+                input.add(x2List.get(miniBatchNum*B + n));
+                desiredOutputVectors.clear();
+                desiredOutputVectors.add(expectedOutputVectors.get(t*B + n));
+                
                 // forward pass
-                forwardPass(input, d, K);
+                actualOutputVectors.clear();
+                final ArrayList<Double> outputVector;
+                outputVector = forwardPass(input, d, K);
+                actualOutputVectors.add(outputVector);
 
                 // backward pass
-                backPropagation(input, i, desiredOutputs, i);
+                backPropagation(input, d, outputVector, K);
+
+                // .. now that we have calculated the partial derivatives add them to the sums
+                // for weights
+                for (int i = 0; i < partialDerivativesWeights.size(); i++) {
+                    for (int j = 0; j < partialDerivativesWeights.get(i).size(); j++) {
+                        sumOfPartialDerivativesWeights.get(i).set(j, sumOfPartialDerivativesWeights.get(i).get(j) + partialDerivativesWeights.get(i).get(j));
+                    }
+                }
+
+                // for biases
+                for (int i = 0; i < partialDerivativesBiases.size(); i++) {
+                    for (int j = 0; j < partialDerivativesBiases.get(i).size(); j++) {
+                        sumOfPartialDerivativesBiases.get(i).set(j, sumOfPartialDerivativesBiases.get(i).get(j) + partialDerivativesBiases.get(i).get(j));
+                    }
+                }
+
             }
+
+            // the epoch has ended, now update the weights and biases
+            updateWeights(sumOfPartialDerivativesWeights);
+            updateBiases(sumOfPartialDerivativesBiases);
+
+            // calculate the total error for the epoch
+            totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
         }
 
     }
@@ -279,11 +392,11 @@ public class Network {
         return outputs;
     }
 
-    private void backPropagation(ArrayList<Double> input, int d, ArrayList<Double> desiredOutputs, int K) {
+    private void backPropagation(ArrayList<Double> input, int d, ArrayList<Double> desiredOutputVector, int K) {
 
         // calculate deltas for output layer
         for (int i = 0; i < K; i++) {
-            double delta = (desiredOutputs.get(i) - activations.get(4).get(i)) * activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(4).get(i));
+            double delta = (desiredOutputVector.get(i) - activations.get(4).get(i)) * activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(4).get(i));
             deltas.get(3).set(i, delta);
         }
 

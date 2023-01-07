@@ -10,6 +10,7 @@ Computational Inteligence mye035 project 2022-23
 - [X] Examples generator script
 - [X] Load Training Data function
 - [X] Update Weights and biases function
+- [ ] Move the categorization of the inputs from the generator to the reader
 - [ ] Total Trainning error calculation in gradient decent algorithm and print
 - [ ] Add the termination condition for the gradient decent algorithm
 - [ ] Implement run function (calculate generalization percentage)
