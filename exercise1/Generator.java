@@ -15,36 +15,6 @@ public class Generator {
 
                 Float x1 = rand.nextFloat(2) - 1;
                 Float x2 = rand.nextFloat(2) - 1;
-                
-                
-                if (Math.pow((x1-0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2>0.5){
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                }
-                else if(Math.pow((x1-0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2<0.5){
-                   
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                }
-                else if(Math.pow((x1+0.5),2) + Math.pow((x2+0.5),2) < 0.2 && x2>-0.5){
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                }
-                else if(Math.pow((x1+0.5),2) + Math.pow((x2+0.5),2) < 0.2 && x2<-0.5){
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                }
-                else if(Math.pow((x1-0.5),2) + Math.pow(x2+0.5,2) <0.2 && x2>-0.5){
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                }
-                else if(Math.pow((x1-0.5),2) + Math.pow((x2+0.5),2) <0.2 && x2<-0.5){
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                }
-                else if(Math.pow((x1+0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2>0.5){
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                }
-                else if(Math.pow((x1+0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2<0.5){
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                }
-                else{
-                        fw.write("[" + x1 + "," + x2 + "]" + " category: C3 \n");
-                }
         
             }
 
@@ -62,36 +32,6 @@ public class Generator {
     
                     Float x1 = rand.nextFloat(2) - 1;
                     Float x2 = rand.nextFloat(2) - 1;
-                    
-                    
-                    if (Math.pow((x1-0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2>0.5){
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                    }
-                    else if(Math.pow((x1-0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2<0.5){
-                       
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                    }
-                    else if(Math.pow((x1+0.5),2) + Math.pow((x2+0.5),2) < 0.2 && x2>-0.5){
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                    }
-                    else if(Math.pow((x1+0.5),2) + Math.pow((x2+0.5),2) < 0.2 && x2<-0.5){
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                    }
-                    else if(Math.pow((x1-0.5),2) + Math.pow(x2+0.5,2) <0.2 && x2>-0.5){
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                    }
-                    else if(Math.pow((x1-0.5),2) + Math.pow((x2+0.5),2) <0.2 && x2<-0.5){
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                    }
-                    else if(Math.pow((x1+0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2>0.5){
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C1 \n");
-                    }
-                    else if(Math.pow((x1+0.5),2) + Math.pow((x2-0.5),2) < 0.2 && x2<0.5){
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C2 \n");
-                    }
-                    else{
-                            fw.write("[" + x1 + "," + x2 + "]" + " category: C3 \n");
-                    }
             
                 }
     
