@@ -428,6 +428,58 @@ public class Network {
         
     }
 
+
+    // results stores the final list of the outputs of the network
+    private ArrayList<Double> results = new ArrayList<Double>();
+    // outputs temporarily stores the outputs of the network
+    private ArrayList<Double> outputs = new ArrayList<Double>(); 
+
+    //find the max index of the outputs 
+    public int findMax(ArrayList<Double> outputs){
+        int maxIndex = 0;
+
+        for (int i = 0; i < 3; i++) {
+            if (outputs.get(i) > outputs.get(maxIndex)) {
+                maxIndex = i;
+            }
+        }
+        return maxIndex;
+    }
+
+
+    public Double run(ArrayList<Double> inputs, int d, int K){
+        
+        for(int i = 0; i<4000; i++){
+
+            //run feed forward and get outputs
+            //use findMax to get the index of the output with the highest probability
+            //add the corresponding label to the results arraylist
+
+            outputs = forwardPass(inputs, d, K);
+            int x = findMax(outputs);
+            if(x == 0){
+                results.add(1.0);
+            }
+            else if(x == 1){
+                results.add(2.0);
+            }
+            else if(x == 2){
+                results.add(3.0);
+            }
+        }
+
+        int correct = 0;
+        for(int i = 0; i<4000; i++){
+            if(results.get(i) == desiredOutputs.get(i)){
+                correct++;
+            }
+        }
+
+        //calculate the generalization percentage
+        Double generalizationPercentage = (double)(correct/4000)*100;
+        return generalizationPercentage;
+    }
+
     /**
      * @param args the command line arguments
      */
