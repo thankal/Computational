@@ -479,6 +479,16 @@ public class Network {
     }
         
     }
+
+    private void CalculateOverallError(ArrayList<ArrayList<Double>>actualOutputVectors,ArrayList<ArrayList<Double>>desiredOutputVectors){
+        double OverallError=0;
+        for(int i=0; i<actualOutputVectors.size();i++){
+            for(int j=0; j<K; j++){
+                 OverallError = OverallError + 0.5*(Math.pow(desiredOutputVectors.get(i).get(j)-actualOutputVectors.get(i).get(j),2));
+            }
+        }
+        return OverallError;    
+    }
     // run the user specified activation function
     private double activationFunction(int type, double x) {
         switch (type) {
