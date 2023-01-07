@@ -553,7 +553,7 @@ public class Network {
 
 
     // results stores the final list of the outputs of the network
-    private ArrayList<Double> results = new ArrayList<Double>();
+    private ArrayList<ArrayList<Double>> results = new ArrayList<ArrayList<Double>>();
     // outputs temporarily stores the outputs of the network
     private ArrayList<Double> outputs = new ArrayList<Double>(); 
 
@@ -570,31 +570,56 @@ public class Network {
     }
 
 
-    public Double run(ArrayList<Double> inputs, int d, int K){
+    public Double run(){
+        // array to store the inputs from loadInputs()
+        ArrayList<Double> inputs = new ArrayList<Double>(2);
         
+        // arrays for (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
+        ArrayList<Double> first = new ArrayList<Double>(3);
+        ArrayList<Double> second = new ArrayList<Double>(3);
+        ArrayList<Double> third = new ArrayList<Double>(3);
+
+        first.set(0, 1.0);
+        first.set(1, 0.0);
+        first.set(2, 0.0);
+
+        second.set(0, 0.0);
+        second.set(1, 1.0);
+        second.set(2, 0.0);
+
+        third.set(0, 0.0);
+        third.set(1, 0.0);
+        third.set(2, 1.0);
+        
+
         for(int i = 0; i<4000; i++){
 
             //run feed forward and get outputs
             //use findMax to get the index of the output with the highest probability
             //add the corresponding label to the results arraylist
 
+            inputs.set(0, x1List.get(i));
+            inputs.set(1, x2List.get(i));
+
             outputs = forwardPass(inputs, d, K);
             int x = findMax(outputs);
             if(x == 0){
-                results.add(1.0);
+                results.add(first);
             }
             else if(x == 1){
-                results.add(2.0);
+                results.add(second);
             }
             else if(x == 2){
-                results.add(3.0);
+                results.add(third);
             }
         }
-
+        
         int correct = 0;
         for(int i = 0; i<4000; i++){
-            if(results.get(i) == desiredOutputs.get(i)){
-                correct++;
+            for(int j = 0; j<3; j++){
+                if(results.get(i).get(j) == expectedOutputVectors.get(i).get(j)){
+                    correct++;
+                }
             }
         }
 
