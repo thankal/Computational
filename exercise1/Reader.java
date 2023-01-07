@@ -7,12 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import javax.sound.sampled.BooleanControl.Type;
 
 public class Reader {
     
-    // final list of 2 lists, each with 4000 elements
-    private ArrayList<ArrayList<Double>> xList = new ArrayList<ArrayList<Double>>();
     
     public static ArrayList<ArrayList<Double>> readFile(String filename){
 
@@ -89,33 +86,6 @@ public class Reader {
             e.printStackTrace();
         }
 
-        try{
-            File file2 = new File(filename);
-            BufferedReader br2 = new BufferedReader(new FileReader(file2));
-            Double d2 = 0.0;
-
-            line = br2.readLine();
-            while ((line = br2.readLine()) != null){
-                //read last 2 characters of the line and add them to the category list
-                String category = line.substring(line.length() - 2);
-                if (category.equals("1 ")){
-                    d2 = 1.0;
-                }
-                else if (category.equals("2 ")){
-                    d2 = 2.0;
-                }
-                else if (category.equals("3 ")){
-                    d2 = 3.0;
-                }
-                
-                categoryList.add(d2);
-            }
-            br2.close();
-            
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
 
         xList.add(categoryList);
         System.out.println(xList);
