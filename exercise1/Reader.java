@@ -23,7 +23,6 @@ public class Reader {
     
         ArrayList<Double> x1List = new ArrayList<Double>();
         ArrayList<Double> x2List = new ArrayList<Double>();
-        ArrayList<Double> categoryList = new ArrayList<Double>();
         ArrayList<ArrayList<Double>> xList = new ArrayList<ArrayList<Double>>();
 
         try{
@@ -31,10 +30,10 @@ public class Reader {
 
             BufferedReader br = new BufferedReader(new FileReader(file));  
 
-            while ((line = br.readLine()) != null) {
+            do {
                 c = br.read();
                 counter ++;
-                System.out.println(counter);
+                // System.out.println(counter);
 
                 st = Character.toString((char)c);
                 
@@ -75,20 +74,18 @@ public class Reader {
 
                 }
 
-            }
+            } while (((line = br.readLine()) != null));
             br.close();
             xList.add(x1List);
             xList.add(x2List);
-            System.out.println(xList);
+            // System.out.println(xList);
 
         }
         catch (IOException e){
             e.printStackTrace();
         }
 
-
-        xList.add(categoryList);
-        System.out.println(xList);
+        // System.out.println(xList);
         return xList;
 
     }
