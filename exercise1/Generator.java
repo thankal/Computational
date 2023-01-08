@@ -10,12 +10,13 @@ public class Generator {
         
         try{
             FileWriter fw = new FileWriter("training_data.txt");
-            fw.write(" \n");
+            // fw.write(" \n");
             for (int i = 0; i < 4000; i++){
 
-                Float x1 = rand.nextFloat(2) - 1;
-                Float x2 = rand.nextFloat(2) - 1;
+                Float x1 = 2*rand.nextFloat() - 1;
+                Float x2 = 2*rand.nextFloat() - 1;
         
+                fw.write("[" + x1 + "," + x2 + "]\n");
             }
 
         fw.close();
@@ -26,13 +27,14 @@ public class Generator {
 
         try{
                 FileWriter fw = new FileWriter("experiment_data.txt");
-                fw.write(" \n");
+                // fw.write(" \n");
     
                 for (int i = 0; i < 4000; i++){
     
-                    Float x1 = rand.nextFloat(2) - 1;
-                    Float x2 = rand.nextFloat(2) - 1;
-            
+                    Float x1 = 2*rand.nextFloat() - 1;
+                    Float x2 = 2*rand.nextFloat() - 1;
+
+                    fw.write("[" + x1 + "," + x2 + "]\n");
                 }
     
             fw.close();

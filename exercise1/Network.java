@@ -17,13 +17,16 @@ public class Network {
     
     // Number of neurons for each hidden layer
     private int[] NUM_OF_H_NEURONS = {10, 10, 10};
+
+    // Number of neurons per layer
+    private int[] NUM_OF_NEURONS = {d, NUM_OF_H_NEURONS[0], NUM_OF_H_NEURONS[1], NUM_OF_H_NEURONS[2], K};
     
     // Type of activation function (for hidden layers only)
     private int ACTIVATION_FUNCTION_TYPE = 1;
 
-    private static int MAX_EPOCHS = 700;
+    private  int MAX_EPOCHS = 700;
 
-    private static double ERROR_THRESHOLD = 0.0; // TODO: fine-tune
+    private  double ERROR_THRESHOLD = 0.0; // TODO: fine-tune
     
     // The weights of the network (for each layer)
     private ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
@@ -61,7 +64,45 @@ public class Network {
     private ArrayList<ArrayList<Double>> expectedOutputVectors = new ArrayList<ArrayList<Double>>();
     
 
+    // constructor set the constants
+    public Network(int d, int K, double LEARNING_RATE, int[] NUM_OF_H_NEURONS, int ACTIVATION_FUNCTION_TYPE, int MAX_EPOCHS, double ERROR_THRESHOLD, int B) {
+        this.d = d;
+        this.K = K;
+        this.LEARNING_RATE = LEARNING_RATE;
+        this.NUM_OF_H_NEURONS = NUM_OF_H_NEURONS;
+        this.ACTIVATION_FUNCTION_TYPE = ACTIVATION_FUNCTION_TYPE;
+        this.MAX_EPOCHS = MAX_EPOCHS;
+        this.ERROR_THRESHOLD = ERROR_THRESHOLD;
+        this.B = B;
 
+
+        // Initialize lists with zeros
+        activations.add(new ArrayList<Double>(d));
+        for (int j = 0; j < d; j++) {
+            activations.get(0).add(0.0);
+        }
+
+        for (int i = 1; i < NUM_OF_NEURONS.length; i++) {
+            biases.add(new ArrayList<Double>(NUM_OF_NEURONS[i]));
+            weights.add(new ArrayList<Double>(NUM_OF_NEURONS[i]*NUM_OF_NEURONS[i-1]));
+            totalInputs.add(new ArrayList<Double>(NUM_OF_NEURONS[i]));
+            activations.add(new ArrayList<Double>(NUM_OF_NEURONS[i]));
+            deltas.add(new ArrayList<Double>(NUM_OF_NEURONS[i]));
+            partialDerivativesBiases.add(new ArrayList<Double>(NUM_OF_NEURONS[i]));
+            partialDerivativesWeights.add(new ArrayList<Double>(NUM_OF_NEURONS[i]*NUM_OF_NEURONS[i-1]));
+            for (int j = 0; j < NUM_OF_NEURONS[i]; j++) {
+                biases.get(i-1).add(0.0);
+                totalInputs.get(i-1).add(0.0);
+                activations.get(i).add(0.0);
+                deltas.get(i-1).add(0.0);
+                partialDerivativesBiases.get(i-1).add(0.0);
+            }
+            for (int j = 0; j < NUM_OF_NEURONS[i]*NUM_OF_NEURONS[i-1]; j++) {
+                weights.get(i-1).add(0.0);
+                partialDerivativesWeights.get(i-1).add(0.0);
+            }
+        }
+    }
 
 
     // initialize the weights with random values in the range [-1,1]
@@ -110,15 +151,15 @@ public class Network {
     }
 
 
-    private void loadInputs() {
-        // TODO: what filename?
-        final ArrayList<ArrayList<Double>> temp = Reader.readFile("data.txt");
+    private void loadInputs(String filename) {
+        final ArrayList<ArrayList<Double>> temp = Reader.readFile(filename);
 
         // initialize the input lists
         x1List = temp.get(0);
         x2List = temp.get(1);
 
         // categorize each point to a category (C1, C2, or C3)
+        expectedOutputVectors.clear(); // reset the list
         ArrayList<Double> expectedOutputVector;
         int category = 0;
         for (int i = 0; i < x1List.size(); i++) {
@@ -172,7 +213,7 @@ public class Network {
     }
 
 
-    public void gradientDecentAlgorithm() {
+    public void gradientDescentAlgorithm() {
         ArrayList<Double> input = new ArrayList<Double>(d);
         ArrayList<ArrayList<Double>> desiredOutputVectors = new ArrayList<ArrayList<Double>>();
         ArrayList<ArrayList<Double>> actualOutputVectors = new ArrayList<ArrayList<Double>>();
@@ -186,6 +227,7 @@ public class Network {
             // for each input
             int t = 0; // epoch counter
             do {
+                System.out.println("Epoch: " + t+1);
                 // initialize the input vector and the desired output 
                 input.clear();
                 input.add(x1List.get(t));
@@ -338,7 +380,7 @@ public class Network {
             // for each neuron
             // iterate through its inputs
             double z = 0; // initialize temp for calculating total input of one neuron
-            for (int j = 0; j <= d; j++) {
+            for (int j = 0; j < d; j++) { // TODO: erased '<='
                 // calculate the activation
                 z += activations.get(0).get(j) * weights.get(0).get(j);
             }
@@ -355,7 +397,7 @@ public class Network {
             // for each neuron
             // iterate through its inputs
             double z = 0; // initialize temp for calculating total input of one neuron
-            for (int j = 0; j <= NUM_OF_H_NEURONS[0]; j++) {
+            for (int j = 0; j < NUM_OF_H_NEURONS[0]; j++) {
                 // calculate the activation
                 z += activations.get(1).get(j) * weights.get(1).get(j);
             }
@@ -372,7 +414,7 @@ public class Network {
             // for each neuron
             // iterate through its inputs
             double z = 0; // initialize temp for calculating total input of one neuron
-            for (int j = 0; j <= NUM_OF_H_NEURONS[1]; j++) {
+            for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
                 // calculate the activation
                 z += activations.get(2).get(j) * weights.get(2).get(j);
             }
@@ -389,7 +431,7 @@ public class Network {
             // for each neuron
             // iterate through its inputs
             double z = 0; // initialize temp for calculating total input of one neuron
-            for (int j = 0; j <= NUM_OF_H_NEURONS[2]; j++) {
+            for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
                 // calculate the activation
                 z += activations.get(3).get(j) * weights.get(3).get(j);
             }
@@ -410,7 +452,7 @@ public class Network {
 
         // calculate deltas for output layer
         for (int i = 0; i < K; i++) {
-            double delta = (desiredOutputVector.get(i) - activations.get(4).get(i)) * activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(4).get(i));
+            double delta = (desiredOutputVector.get(i) - activations.get(4).get(i)) * activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(3).get(i));
             deltas.get(3).set(i, delta);
         }
 
@@ -420,7 +462,7 @@ public class Network {
             for (int j = 0; j < K; j++) {
                 delta += deltas.get(3).get(j) * weights.get(3).get(j+1);
             }
-            delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(3).get(i));
+            delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(2).get(i));
             deltas.get(2).set(i, delta);
         }
 
@@ -430,7 +472,7 @@ public class Network {
             for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
                 delta += deltas.get(2).get(j) * weights.get(2).get(j+1);
             }
-            delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(2).get(i));
+            delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(1).get(i));
             deltas.get(1).set(i, delta);
         }
 
@@ -440,7 +482,7 @@ public class Network {
             for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
                 delta += deltas.get(1).get(j) * weights.get(1).get(j+1);
             }
-            delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(1).get(i));
+            delta *= activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(0).get(i));
             deltas.get(0).set(i, delta);
         }
 
@@ -451,8 +493,8 @@ public class Network {
         for (int h=0; h<3 ; h++) {
             for (int j=0; j<NUM_OF_H_NEURONS[h]; j++) {
                 double delta = deltas.get(h).get(j);
-
-                partialDerivativesWeights.get(h).set(j, activations.get(h).get(j) * delta);
+                
+                partialDerivativesWeights.get(h).set(j, activations.get(h).get(j%NUM_OF_NEURONS[h]) * delta); // TODO: modulo correct?
                 partialDerivativesBiases.get(h).set(j, delta);
             }
         }
@@ -472,9 +514,9 @@ public class Network {
     // update weights 
     private void updateWeights(ArrayList<ArrayList<Double>> partialDerivativesWeights){
         double temp = 0;
-        for(int i=0; i<weights.size(); i++){
-            for(int j=0; j<weights.get(i).size(); j++){
-                temp = weights.get(i).get(j) - LEARNING_RATE *  partialDerivativesWeights.get(i).get(j);
+        for(int i=0; i<partialDerivativesWeights.size(); i++){
+            for(int j=0; j<partialDerivativesWeights.get(i).size(); j++){
+                temp = weights.get(i).get(j) - LEARNING_RATE * partialDerivativesWeights.get(i).get(j);
                 weights.get(i).set(j,temp);
             }  
 
@@ -485,8 +527,8 @@ public class Network {
     // update biases 
     private void updateBiases(ArrayList<ArrayList<Double>> partialDerivativesBiases){
         double newValue = 0;
-        for(int i=0; i<biases.size(); i++){
-            for(int j=0; j<biases.get(i).size(); j++){
+        for(int i=0; i<partialDerivativesBiases.size(); i++){
+            for(int j=0; j<partialDerivativesBiases.get(i).size(); j++){
                 newValue = biases.get(i).get(j) - LEARNING_RATE * partialDerivativesBiases.get(i).get(j);
                 biases.get(i).set(j,newValue);
         }
@@ -571,7 +613,7 @@ public class Network {
 
     //find the max index of the outputs 
     public int findMax(ArrayList<Double> outputs){
-        int maxIndex = 0;
+        int maxIndex = -1;
 
         for (int i = 0; i < 3; i++) {
             if (outputs.get(i) > outputs.get(maxIndex)) {
@@ -582,14 +624,14 @@ public class Network {
     }
 
 
-    public Double run(){
+    public double run(){
         // results stores the final list of the outputs of the network
         ArrayList<ArrayList<Double>> results = new ArrayList<ArrayList<Double>>();
         // outputs temporarily stores the outputs of the network
         ArrayList<Double> outputs = new ArrayList<Double>(); 
 
         // load the inputs from the file
-        loadInputs();
+        loadInputs("experiment_data.txt");
 
         // array to store the inputs from loadInputs()
         ArrayList<Double> inputs = new ArrayList<Double>(2);
@@ -599,18 +641,22 @@ public class Network {
         ArrayList<Double> second = new ArrayList<Double>(3);
         ArrayList<Double> third = new ArrayList<Double>(3);
 
-        first.set(0, 1.0);
-        first.set(1, 0.0);
-        first.set(2, 0.0);
+        first.add(1.0);
+        first.add(0.0);
+        first.add(0.0);
 
-        second.set(0, 0.0);
-        second.set(1, 1.0);
-        second.set(2, 0.0);
+        second.add(0.0);
+        second.add(1.0);
+        second.add(0.0);
 
-        third.set(0, 0.0);
-        third.set(1, 0.0);
-        third.set(2, 1.0);
-        
+        third.add(0.0);
+        third.add(0.0);
+        third.add(1.0);
+
+
+        // initialize input vector
+        inputs.add(0.0);
+        inputs.add(0.0);
 
         for(int i = 0; i<4000; i++){
 
@@ -634,6 +680,10 @@ public class Network {
             }
         }
         
+        System.out.println("Results: " + results);
+        System.out.println("-----------------------------");
+        System.out.println("Expected: " + expectedOutputVectors);
+
         int correct = 0;
         for(int i = 0; i<4000; i++){
             for(int j = 0; j<3; j++){
@@ -652,9 +702,35 @@ public class Network {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        // test runs
 
-        System.out.println("Hello World");
+        /* 
+        // Learning rate
+        private double LEARNING_RATE = 0.1;
+        
+        // Number of neurons for each hidden layer
+        private int[] NUM_OF_H_NEURONS = {10, 10, 10};
+        
+        // Type of activation function (for hidden layers only)
+        private int ACTIVATION_FUNCTION_TYPE = 1;
+
+        private static int MAX_EPOCHS = 700;
+
+        private static double ERROR_THRESHOLD = 0.0; // TODO: fine-tune
+        */
+
+
+        int[] H = {10, 10, 10};
+        Network mlp = new Network(2, 3, 0.1, H, 1, 700, 0.0, 1);
+
+        // load the inputs from the file
+        mlp.loadInputs("training_data.txt");
+
+        // train the network
+        mlp.gradientDescentAlgorithm();
+
+        double x = mlp.run();
+        System.out.println("Generalization percentage: " + x + "%");
     }
 
 }
