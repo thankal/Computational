@@ -374,7 +374,6 @@ public class Network {
             activations.get(0).set(i, input.get(i));
         }
 
-
         // calculate the activations of the first hidden layer (H1)
         for (int i = 0; i < NUM_OF_H_NEURONS[0]; i++) {
             // for each neuron
@@ -614,9 +613,10 @@ public class Network {
     //find the max index of the outputs 
     public int findMax(ArrayList<Double> outputs){
         int maxIndex = -1;
-
+        double max = 0.0;
         for (int i = 0; i < 3; i++) {
-            if (outputs.get(i) > outputs.get(maxIndex)) {
+            if (outputs.get(i) > max) {
+                max = outputs.get(i);
                 maxIndex = i;
             }
         }
@@ -668,7 +668,9 @@ public class Network {
             inputs.set(1, x2List.get(i));
 
             outputs = forwardPass(inputs, d, K);
+            //System.out.println("outputs: " + outputs);
             int x = findMax(outputs);
+            //System.out.println("x: " + x);
             if(x == 0){
                 results.add(first);
             }
@@ -680,21 +682,30 @@ public class Network {
             }
         }
         
-        System.out.println("Results: " + results);
-        System.out.println("-----------------------------");
-        System.out.println("Expected: " + expectedOutputVectors);
+        //System.out.println("Results: " + results);
+        //System.out.println("-----------------------------");
+        //System.out.println("Expected: " + expectedOutputVectors);
 
         int correct = 0;
         for(int i = 0; i<4000; i++){
-            for(int j = 0; j<3; j++){
-                if(results.get(i).get(j) == expectedOutputVectors.get(i).get(j)){
-                    correct++;
-                }
+            boolean flag = false;
+
+            // if(results.get(i).get(0) == expectedOutputVectors.get(i).get(0) 
+            // && results.get(i).get(1) == expectedOutputVectors.get(i).get(1) 
+            // && results.get(i).get(2) == expectedOutputVectors.get(i).get(2)){
+
+            if (results.get(i).equals(expectedOutputVectors.get(i))){
+                flag = true;
+            }
+
+            if (flag == true){
+                correct ++;        
             }
         }
+        System.out.println(correct);
 
         //calculate the generalization percentage
-        Double generalizationPercentage = (double)(correct/4000)*100;
+        Double generalizationPercentage = (double) correct * 100 / 4000;
         return generalizationPercentage;
     }
 
