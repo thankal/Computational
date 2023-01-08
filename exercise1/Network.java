@@ -5,21 +5,26 @@ import java.util.Arrays;
 
 public class Network {
 
+    
     // Number of inputs
     private int d = 2;
-
+    
     // Number of categories
     private int K = 3;
     
     // Learning rate
     private double LEARNING_RATE = 0.1;
-
+    
     // Number of neurons for each hidden layer
     private int[] NUM_OF_H_NEURONS = {10, 10, 10};
-
-    // Type of activation function
+    
+    // Type of activation function (for hidden layers only)
     private int ACTIVATION_FUNCTION_TYPE = 1;
 
+    private static int MAX_EPOCHS = 700;
+
+    private static double ERROR_THRESHOLD = 0.0; // TODO: fine-tune
+    
     // The weights of the network (for each layer)
     private ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
 
@@ -179,7 +184,8 @@ public class Network {
         // Serial update
         if (B == 1) {
             // for each input
-            for (int t = 0; t < x1List.size(); t++) {
+            int t = 0; // epoch counter
+            do {
                 // initialize the input vector and the desired output 
                 input.clear();
                 input.add(x1List.get(t));
@@ -204,7 +210,9 @@ public class Network {
 
                 // calculate the total error for the epoch
                 totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
-            }
+
+                t++;
+            } while (t < x1List.size() || (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
 
         }
 
@@ -214,8 +222,8 @@ public class Network {
             final int miniBatchNum = x1List.size() / B;
             final int remainingInputs = x1List.size() % B;
             
-            // for each mini-batch
-            for (int t = 0; t < miniBatchNum; t++) {
+            int t = 0; // epoch counter
+            do {
                 // initialize sums of partial derivatives (for the epoch)
                 ArrayList<ArrayList<Double>> sumOfPartialDerivativesWeights = new ArrayList<ArrayList<Double>>();
                 ArrayList<ArrayList<Double>> sumOfPartialDerivativesBiases = new ArrayList<ArrayList<Double>>();
@@ -263,7 +271,7 @@ public class Network {
 
                 // calculate the total error for the epoch
                 totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
-            }
+            } while (t < miniBatchNum || (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
 
 
             // for the last batch of remaining inputs (if any)
@@ -389,7 +397,8 @@ public class Network {
             z += biases.get(3).get(i); 
             totalInputs.get(3).set(i, z); // update the table
 
-            double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
+            // TODO: maybe softmax?
+            double new_activation = activationFunction(1, z); // for output use sigmoid always
             activations.get(4).set(i, new_activation); // update the table
         }
 
