@@ -28,9 +28,9 @@ public class Network {
     // Type of activation function (for hidden layers only)
     private int ACTIVATION_FUNCTION_TYPE = 1;
 
-    private  int MAX_EPOCHS = 700;
+    private  int MIN_EPOCHS = 700;
 
-    private  double ERROR_THRESHOLD = 0.0; // TODO: fine-tune
+    private  double ERROR_THRESHOLD = 0.0;
     
     // The weights of the network (for each layer)
     private ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
@@ -41,14 +41,8 @@ public class Network {
     // The total input of each neuron
     private ArrayList<ArrayList<Double>> totalInputs = new ArrayList<ArrayList<Double>>();
 
-    /* reduntant? TODO: remove
-    // The desired outputs
-    private ArrayList<Double> desiredOutputs = new ArrayList<Double>();
-    */
-
     // The activation of each neuron
     private ArrayList<ArrayList<Double>> activations = new ArrayList<ArrayList<Double>>();
-
 
     // The deltas of each neuron
     private ArrayList<ArrayList<Double>> deltas = new ArrayList<ArrayList<Double>>();
@@ -69,7 +63,7 @@ public class Network {
     
 
     // constructor set the constants
-    public Network(int d, int K, double LEARNING_RATE, int[] NUM_OF_H_NEURONS, int ACTIVATION_FUNCTION_TYPE, int MAX_EPOCHS, double ERROR_THRESHOLD, int B) {
+    public Network(int d, int K, double LEARNING_RATE, int[] NUM_OF_H_NEURONS, int ACTIVATION_FUNCTION_TYPE, int MIN_EPOCHS, double ERROR_THRESHOLD, int B) {
         this.d = d;
         this.K = K;
         this.LEARNING_RATE = LEARNING_RATE;
@@ -86,7 +80,7 @@ public class Network {
 
 
         this.ACTIVATION_FUNCTION_TYPE = ACTIVATION_FUNCTION_TYPE;
-        this.MAX_EPOCHS = MAX_EPOCHS;
+        this.MIN_EPOCHS = MIN_EPOCHS;
         this.ERROR_THRESHOLD = ERROR_THRESHOLD;
         this.B = B;
 
@@ -97,16 +91,6 @@ public class Network {
             activations.get(0).add(0.0);
         }
 
-        // // initialize weights table with zeros
-        // for (int h = 0; h < NUM_OF_NEURONS.length-1; h++) {
-        //     weights.add(new ArrayList<ArrayList<Double>>(NUM_OF_NEURONS[h+1]));
-        //     for (int j = 0; j < NUM_OF_NEURONS[h+1]; j++) {
-        //         weights.get(h).add(new ArrayList<Double>(NUM_OF_NEURONS[i]));
-        //         for (int k = 0; k < NUM_OF_NEURONS[i]; k++) {
-        //             weights.get(i).get(j).add(0.0);
-        //         }
-        //     }
-        // }
 
         for (int i = 1; i < NUM_OF_NEURONS.length; i++) {
             biases.add(new ArrayList<Double>(NUM_OF_NEURONS[i]));
@@ -286,7 +270,7 @@ public class Network {
                 //System.out.println("Epoch: " + (t+1) + " Total error: " + totalErrors.get(t));
 
                 t++;
-            } while (t < x1List.size() && (t < MAX_EPOCHS || Math.abs(totalErrors.get(t-2) - totalErrors.get(t-1)) > ERROR_THRESHOLD));
+            } while (t < x1List.size() && (t < MIN_EPOCHS || Math.abs(totalErrors.get(t-2) - totalErrors.get(t-1)) > ERROR_THRESHOLD));
 
         }
 
@@ -370,7 +354,7 @@ public class Network {
 
                 t++;
 
-            } while (t < miniBatchNum && (t < MAX_EPOCHS || Math.abs(totalErrors.get(t-2) - totalErrors.get(t-1)) > ERROR_THRESHOLD));
+            } while (t < miniBatchNum && (t < MIN_EPOCHS || Math.abs(totalErrors.get(t-2) - totalErrors.get(t-1)) > ERROR_THRESHOLD));
 
 
             // for the last batch of remaining inputs (if any)
@@ -439,7 +423,7 @@ public class Network {
             // for each neuron
             // iterate through its inputs
             double z = 0; // initialize temp for calculating total input of one neuron
-            for (int j = 0; j < d; j++) { // TODO: erased '<='
+            for (int j = 0; j < d; j++) {
                 // calculate the activation
                 z += activations.get(0).get(j) * weights.get(0).get(j + i*d);
             }
@@ -809,7 +793,7 @@ public class Network {
         }
         
         
-        System.out.println(correct);
+        // System.out.println(correct);
 
         //calculate the generalization percentage
         Double generalizationPercentage = (double) correct * 100 / 4000;
@@ -821,22 +805,7 @@ public class Network {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // test runs
-
-        /* 
-        // Learning rate
-        private double LEARNING_RATE = 0.1;
-        
-        // Number of neurons for each hidden layer
-        private int[] NUM_OF_H_NEURONS = {10, 10, 10};
-        
-        // Type of activation function (for hidden layers only)
-        private int ACTIVATION_FUNCTION_TYPE = 1;
-
-        private static int MAX_EPOCHS = 700;
-
-        private static double ERROR_THRESHOLD = 0.0; // TODO: fine-tune
-        */
+        // test runs the network with the given parameters
         File file = new File("results.txt");
         file.delete();
 
@@ -845,14 +814,14 @@ public class Network {
         int size_of_output = 3;
         double learning_rate = 0.1;
         int activation_function = 2;
-        int max_epochs = 700;
+        int min_epochs = 700;
         double error_threshold = 0.00000001;
         int batch_size = 1;
         
         String function_name = "";        
 
         Network mlp = new Network(size_of_input, size_of_output, learning_rate, H, 
-        activation_function, max_epochs, error_threshold, batch_size);
+        activation_function, min_epochs, error_threshold, batch_size);
         
         try{
             FileWriter f = new FileWriter("parameters.txt", true);
@@ -867,7 +836,7 @@ public class Network {
 
             }
             f.write("Size of first hidden layer: " + H[0] + "\nSize of second hidden layer: " + H[1] + "\nSize of third hidden layer: " + H[2] + 
-            "\nLearning Rate: " + learning_rate + " \t Activation function: " + function_name + "\nMax number of epochs: " + max_epochs +
+            "\nLearning Rate: " + learning_rate + " \t Activation function: " + function_name + "\nMin number of epochs: " + min_epochs +
             "\t Error Threshold: " + error_threshold + "\t Batch size: " + batch_size + "\n");
 
             // load the inputs from the file
