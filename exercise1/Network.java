@@ -316,9 +316,7 @@ public class Network {
                     }
                     sumOfPartialDerivativesBiases.add(sumOfPartialDerivativesBiases_i);
                 }
-                
-                
-                
+
                 
                 // for each input in the mini-batch
                 for (int n = 0; n < B; n++) {
@@ -328,12 +326,14 @@ public class Network {
                     input.add(x2List.get(t*B + n));
                     desiredOutputVectors.clear();
                     final ArrayList<Double> desiredOutputVector = expectedOutputVectors.get(t*B + n);
+                    System.out.println("Desired: " + desiredOutputVector);
                     desiredOutputVectors.add(desiredOutputVector);
                     
                     // forward pass
                     actualOutputVectors.clear();
                     final ArrayList<Double> outputVector;
                     outputVector = forwardPass(input, d, K);
+                    System.out.println("Output: " + outputVector);
                     actualOutputVectors.add(outputVector);
 
                     // backward pass
@@ -343,14 +343,14 @@ public class Network {
                     // for weights
                     for (int i = 0; i < partialDerivativesWeights.size(); i++) {
                         for (int j = 0; j < partialDerivativesWeights.get(i).size(); j++) {
-                            sumOfPartialDerivativesWeights.get(i).add(sumOfPartialDerivativesWeights.get(i).get(j) + partialDerivativesWeights.get(i).get(j));
+                            sumOfPartialDerivativesWeights.get(i).set(j, sumOfPartialDerivativesWeights.get(i).get(j) + partialDerivativesWeights.get(i).get(j));
                         }
                     }
 
                     // for biases
                     for (int i = 0; i < partialDerivativesBiases.size(); i++) {
                         for (int j = 0; j < partialDerivativesBiases.get(i).size(); j++) {
-                            sumOfPartialDerivativesBiases.get(i).add(sumOfPartialDerivativesBiases.get(i).get(j) + partialDerivativesBiases.get(i).get(j));
+                            sumOfPartialDerivativesBiases.get(i).set(j, sumOfPartialDerivativesBiases.get(i).get(j) + partialDerivativesBiases.get(i).get(j));
                         }
                     }
 
@@ -362,7 +362,11 @@ public class Network {
 
                 // calculate the total error for the epoch
                 totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
-            } while (t < miniBatchNum || (t < MAX_EPOCHS || totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
+                System.out.println("Epoch: " + (t+1) + " Total error: " + totalErrors.get(t));
+
+                t++;
+
+            } while (t < miniBatchNum && (t < MAX_EPOCHS || Math.abs(totalErrors.get(t-2) - totalErrors.get(t-1)) > ERROR_THRESHOLD));
 
 
             // for the last batch of remaining inputs (if any)
@@ -370,6 +374,7 @@ public class Network {
             ArrayList<ArrayList<Double>> sumOfPartialDerivativesWeights = new ArrayList<ArrayList<Double>>();
             ArrayList<ArrayList<Double>> sumOfPartialDerivativesBiases = new ArrayList<ArrayList<Double>>();
             for (int n = 0; n < remainingInputs; n++) {
+                System.out.println("Remaining input: " + n);
 
                 // prepare the input vector and the desired output 
                 input.clear();
@@ -411,6 +416,8 @@ public class Network {
 
             // calculate the total error for the epoch
             totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
+            System.out.println("Epoch: " + (t+1) + " Total error: " + totalErrors.get(t));
+
         }
 
     }
@@ -569,10 +576,9 @@ public class Network {
     // update weights 
     private void updateWeights(ArrayList<ArrayList<Double>> partialDerivativesWeights){
         double temp = 0;
+       
         for(int i=0; i<partialDerivativesWeights.size(); i++){
             for(int j=0; j<partialDerivativesWeights.get(i).size(); j++){
-                // System.out.println("weights.get("+i+").get("+j+"): " + weights.get(i).get(j));
-                // System.out.println("partialDerivativesWeights.get("+i+").get("+j+"): " + partialDerivativesWeights.get(i).get(j));
                 temp = weights.get(i).get(j) + LEARNING_RATE * partialDerivativesWeights.get(i).get(j);
                 weights.get(i).set(j,temp);
             }  
@@ -811,7 +817,7 @@ public class Network {
 
 
         int[] H = {10, 10, 10};
-        Network mlp = new Network(2, 3, 0.1, H, 2, 700, 0.00000001, 1);
+        Network mlp = new Network(2, 3, 0.1, H, 2, 700, 0.00000001, 10);
 
         // load the inputs from the file
         mlp.loadInputs("training_data.txt");
