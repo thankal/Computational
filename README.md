@@ -1,5 +1,6 @@
 # Computational
 Computational Inteligence mye035 project 2022-23
+Hands-on implementation of a multilayer perceptron neural network for categorization problem.
 
 ## TODO:
 - [X] Feedforward implementation
@@ -15,5 +16,5 @@ Computational Inteligence mye035 project 2022-23
 - [X] Add the termination condition for the gradient decent algorithm
 - [X] Implement run function (calculate generalization percentage)
 - [X] Implement main function with different executions (changing global paramenters)
-- [ ] Report with diagrams and tables with execution statistics
+- [Χ] Report with diagrams and tables with execution statistics
 
