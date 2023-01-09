@@ -439,7 +439,7 @@ public class Network {
             double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
             activations.get(1).set(i, new_activation); // update the table
         }
-
+        
         // calculate the activations of the second hidden layer (H2)
         for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
             // for each neuron
