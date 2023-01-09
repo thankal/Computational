@@ -2,6 +2,10 @@ package exercise1;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+
 
 public class Network {
 
@@ -260,14 +264,14 @@ public class Network {
                 desiredOutputVectors.clear();
 
                 final ArrayList<Double> desiredOutputVector = expectedOutputVectors.get(t);
-                System.out.println("Desired: " + desiredOutputVector);
+                //System.out.println("Desired: " + desiredOutputVector);
                 desiredOutputVectors.add(desiredOutputVector);
                 
                 // forward pass
                 actualOutputVectors.clear();
                 final ArrayList<Double> outputVector;
                 outputVector = forwardPass(input, d, K);
-                System.out.println("Output: " + outputVector);
+                //System.out.println("Output: " + outputVector);
                 actualOutputVectors.add(outputVector);
 
                 // backward pass
@@ -279,7 +283,7 @@ public class Network {
 
                 // calculate the total error for the epoch
                 totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
-                System.out.println("Epoch: " + (t+1) + " Total error: " + totalErrors.get(t));
+                //System.out.println("Epoch: " + (t+1) + " Total error: " + totalErrors.get(t));
 
                 t++;
             } while (t < x1List.size() && (t < MAX_EPOCHS || Math.abs(totalErrors.get(t-2) - totalErrors.get(t-1)) > ERROR_THRESHOLD));
@@ -766,32 +770,51 @@ public class Network {
                 results.add(third);
             }
         }
-        
-        //System.out.println("Results: " + results);
-        //System.out.println("-----------------------------");
-        //System.out.println("Expected: " + expectedOutputVectors);
 
         int correct = 0;
+
+            
         for(int i = 0; i<4000; i++){
             boolean flag = false;
-
-            // if(results.get(i).get(0) == expectedOutputVectors.get(i).get(0) 
-            // && results.get(i).get(1) == expectedOutputVectors.get(i).get(1) 
-            // && results.get(i).get(2) == expectedOutputVectors.get(i).get(2)){
 
             if (results.get(i).equals(expectedOutputVectors.get(i))){
                 flag = true;
             }
 
             if (flag == true){
-                correct ++;        
+                correct ++; 
+                try{
+                    FileWriter fw = new FileWriter("results.txt", true);
+                    
+                    fw.write(x1List.get(i).toString() + " " + x2List.get(i).toString() + " \t \t + \n");   
+                    fw.close();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                } 
             }
+            else{
+                try{
+                    FileWriter fw = new FileWriter("results.txt", true);
+                
+                    fw.write(x1List.get(i).toString() + " " + x2List.get(i).toString() + "\t \t - \n");
+                    fw.close();
+
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+
         }
+        
+        
         System.out.println(correct);
 
         //calculate the generalization percentage
         Double generalizationPercentage = (double) correct * 100 / 4000;
         return generalizationPercentage;
+        
     }
 
     /**
@@ -814,20 +837,53 @@ public class Network {
 
         private static double ERROR_THRESHOLD = 0.0; // TODO: fine-tune
         */
-
+        File file = new File("results.txt");
+        file.delete();
 
         int[] H = {10, 10, 10};
-        Network mlp = new Network(2, 3, 0.1, H, 2, 700, 0.00000001, 10);
-
-        // load the inputs from the file
-        mlp.loadInputs("training_data.txt");
-
-        // train the network
-        mlp.gradientDescentAlgorithm();
-
+        int size_of_input = 2;
+        int size_of_output = 3;
+        double learning_rate = 0.1;
+        int activation_function = 2;
+        int max_epochs = 700;
+        double error_threshold = 0.00000001;
+        int batch_size = 1;
         
-        double x = mlp.run();
-        System.out.println("Generalization percentage: " + x + "%");
+        String function_name = "";        
+
+        Network mlp = new Network(size_of_input, size_of_output, learning_rate, H, 
+        activation_function, max_epochs, error_threshold, batch_size);
+        
+        try{
+            FileWriter f = new FileWriter("parameters.txt", true);
+            if (activation_function == 1){
+                function_name = "Logistic";
+            }
+            else if (activation_function == 2){
+                function_name = "Tangent";
+            }
+            else if (activation_function == 3){
+                function_name = "ReLU";
+
+            }
+            f.write("Size of first hidden layer: " + H[0] + "\nSize of second hidden layer: " + H[1] + "\nSize of third hidden layer: " + H[2] + 
+            "\nLearning Rate: " + learning_rate + " \t Activation function: " + function_name + "\nMax number of epochs: " + max_epochs +
+            "\t Error Threshold: " + error_threshold + "\t Batch size: " + batch_size + "\n");
+
+            // load the inputs from the file
+            mlp.loadInputs("training_data.txt");
+
+            // train the network
+            mlp.gradientDescentAlgorithm();
+
+            
+            double x = mlp.run();
+            f.write("Generalization percentage: " + x + "%" + "\n \n \n");
+            System.out.println("Generalization percentage: " + x + "%");
+            f.close();
+        }catch(IOException e){ 
+            e.printStackTrace();
+        }
     }
 
 }
