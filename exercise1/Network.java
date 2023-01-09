@@ -136,9 +136,9 @@ public class Network {
                 // generate a random double between -1 and 1
                 temp.add((Math.random()*2-1));
             }
-            biases.get(0).add(Math.random()*2-1);
+            biases.get(0).set(i, Math.random()*2-1);
         }
-        weights.add(temp);
+        weights.set(0 ,temp);
 
         // add a random value for each weight of the second hidden layer
         temp = new ArrayList<Double>(K);
@@ -146,9 +146,9 @@ public class Network {
             for (int j = 0; j < NUM_OF_H_NEURONS[0]; j++) {
                 temp.add((Math.random()*2-1));
             }
-            biases.get(1).add(Math.random()*2-1);
+            biases.get(1).set(i, Math.random()*2-1);
         }
-        weights.add(temp);
+        weights.set(1, temp);
 
         // add a random value for each weight of the third hidden layer
         temp = new ArrayList<Double>(K);
@@ -156,9 +156,9 @@ public class Network {
             for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
                 temp.add((Math.random()*2-1));
             }
-            biases.get(2).add(Math.random()*2-1);
+            biases.get(2).set(i, Math.random()*2-1);
         }
-        weights.add(temp);
+        weights.set(2, temp);
 
         // add a random value for each weight of the output layer
         temp = new ArrayList<Double>(K);
@@ -166,9 +166,12 @@ public class Network {
             for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
                 temp.add((Math.random()*2-1));
             }
-            biases.get(3).add(Math.random()*2-1);
+            biases.get(3).set(i, Math.random()*2-1);
         }
-        weights.add(temp);
+        weights.set(3, temp);
+
+        // System.out.println("Weights initialized: " + weights);
+        // System.out.println("Biases initialized: " + biases);
         
     }
 
@@ -279,7 +282,7 @@ public class Network {
                 System.out.println("Epoch: " + (t+1) + " Total error: " + totalErrors.get(t));
 
                 t++;
-            } while (t < x1List.size() || (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
+            } while (t < x1List.size() && (t < MAX_EPOCHS || Math.abs(totalErrors.get(t-2) - totalErrors.get(t-1)) > ERROR_THRESHOLD));
 
         }
 
@@ -294,6 +297,27 @@ public class Network {
                 // initialize sums of partial derivatives (for the epoch)
                 ArrayList<ArrayList<Double>> sumOfPartialDerivativesWeights = new ArrayList<ArrayList<Double>>();
                 ArrayList<ArrayList<Double>> sumOfPartialDerivativesBiases = new ArrayList<ArrayList<Double>>();
+
+
+                // initialize sum for weight partial derivatives table with zeros
+                for (int i=0; i<partialDerivativesWeights.size(); i++) {
+                    ArrayList<Double> sumOfPartialDerivativesWeights_i = new ArrayList<Double>();
+                    for (int j=0; j<partialDerivativesWeights.get(i).size(); j++) {
+                        sumOfPartialDerivativesWeights_i.add(0.0);
+                    }
+                    sumOfPartialDerivativesWeights.add(sumOfPartialDerivativesWeights_i);
+                }
+
+                // initialize sum for bias partial derivatives table with zeros
+                for (int i=0; i<partialDerivativesBiases.size(); i++) {
+                    ArrayList<Double> sumOfPartialDerivativesBiases_i = new ArrayList<Double>();
+                    for (int j=0; j<partialDerivativesBiases.get(i).size(); j++) {
+                        sumOfPartialDerivativesBiases_i.add(0.0);
+                    }
+                    sumOfPartialDerivativesBiases.add(sumOfPartialDerivativesBiases_i);
+                }
+                
+                
                 
                 
                 // for each input in the mini-batch
@@ -319,14 +343,14 @@ public class Network {
                     // for weights
                     for (int i = 0; i < partialDerivativesWeights.size(); i++) {
                         for (int j = 0; j < partialDerivativesWeights.get(i).size(); j++) {
-                            sumOfPartialDerivativesWeights.get(i).set(j, sumOfPartialDerivativesWeights.get(i).get(j) + partialDerivativesWeights.get(i).get(j));
+                            sumOfPartialDerivativesWeights.get(i).add(sumOfPartialDerivativesWeights.get(i).get(j) + partialDerivativesWeights.get(i).get(j));
                         }
                     }
 
                     // for biases
                     for (int i = 0; i < partialDerivativesBiases.size(); i++) {
                         for (int j = 0; j < partialDerivativesBiases.get(i).size(); j++) {
-                            sumOfPartialDerivativesBiases.get(i).set(j, sumOfPartialDerivativesBiases.get(i).get(j) + partialDerivativesBiases.get(i).get(j));
+                            sumOfPartialDerivativesBiases.get(i).add(sumOfPartialDerivativesBiases.get(i).get(j) + partialDerivativesBiases.get(i).get(j));
                         }
                     }
 
@@ -338,7 +362,7 @@ public class Network {
 
                 // calculate the total error for the epoch
                 totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
-            } while (t < miniBatchNum || (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
+            } while (t < miniBatchNum || (t < MAX_EPOCHS || totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
 
 
             // for the last batch of remaining inputs (if any)
@@ -406,7 +430,7 @@ public class Network {
             double z = 0; // initialize temp for calculating total input of one neuron
             for (int j = 0; j < d; j++) { // TODO: erased '<='
                 // calculate the activation
-                z += activations.get(0).get(j) * weights.get(0).get(j);
+                z += activations.get(0).get(j) * weights.get(0).get(j + i*d);
             }
             // add the bias to the total input after all input (activations*weights) have been taken into account
             z += biases.get(0).get(i); 
@@ -423,7 +447,7 @@ public class Network {
             double z = 0; // initialize temp for calculating total input of one neuron
             for (int j = 0; j < NUM_OF_H_NEURONS[0]; j++) {
                 // calculate the activation
-                z += activations.get(1).get(j) * weights.get(1).get(j);
+                z += activations.get(1).get(j) * weights.get(1).get(j + i*NUM_OF_H_NEURONS[0]);
             }
             // add the bias to the total input after all input (activations*weights) have been taken into account
             z += biases.get(1).get(i); 
@@ -440,7 +464,7 @@ public class Network {
             double z = 0; // initialize temp for calculating total input of one neuron
             for (int j = 0; j < NUM_OF_H_NEURONS[1]; j++) {
                 // calculate the activation
-                z += activations.get(2).get(j) * weights.get(2).get(j);
+                z += activations.get(2).get(j) * weights.get(2).get(j + i*NUM_OF_H_NEURONS[1]);
             }
             // add the bias to the total input after all input (activations*weights) have been taken into account
             z += biases.get(2).get(i); 
@@ -457,16 +481,18 @@ public class Network {
             double z = 0; // initialize temp for calculating total input of one neuron
             for (int j = 0; j < NUM_OF_H_NEURONS[2]; j++) {
                 // calculate the activation
-                z += activations.get(3).get(j) * weights.get(3).get(j);
+                z += activations.get(3).get(j) * weights.get(3).get(j + i*NUM_OF_H_NEURONS[2]);
             }
             // add the bias to the total input after all input (activations*weights) have been taken into account
             z += biases.get(3).get(i); 
             totalInputs.get(3).set(i, z); // update the table
 
             // TODO: maybe softmax?
-            double new_activation = activationFunction(1, z); // for output use sigmoid always
+            double new_activation = activationFunction(1, z);
             activations.get(4).set(i, new_activation); // update the table
         }
+
+        // System.out.println("activations: " + activations);
 
         outputs = activations.get(4); // the activations of the output neurons
         return outputs;
@@ -476,7 +502,7 @@ public class Network {
 
         // calculate deltas for output layer
         for (int i = 0; i < K; i++) {
-            double delta = (desiredOutputVector.get(i) - activations.get(4).get(i)) * activationFunctionPrime(ACTIVATION_FUNCTION_TYPE, totalInputs.get(3).get(i));
+            double delta = (desiredOutputVector.get(i) - activations.get(4).get(i)) * activationFunctionPrime(1, totalInputs.get(3).get(i));
             deltas.get(3).set(i, delta);
         }
 
@@ -533,9 +559,9 @@ public class Network {
             }
         }
 
-        // print weights and biases
-        System.out.println("Deltas: " + deltas);
-        System.out.println("Partial derivatives weights: " + partialDerivativesWeights);
+        // // print weights and biases
+        // System.out.println("Deltas: " + deltas);
+        // System.out.println("Partial derivatives weights: " + partialDerivativesWeights);
         
         
     }
@@ -545,7 +571,9 @@ public class Network {
         double temp = 0;
         for(int i=0; i<partialDerivativesWeights.size(); i++){
             for(int j=0; j<partialDerivativesWeights.get(i).size(); j++){
-                temp = weights.get(i).get(j) - LEARNING_RATE * partialDerivativesWeights.get(i).get(j);
+                // System.out.println("weights.get("+i+").get("+j+"): " + weights.get(i).get(j));
+                // System.out.println("partialDerivativesWeights.get("+i+").get("+j+"): " + partialDerivativesWeights.get(i).get(j));
+                temp = weights.get(i).get(j) + LEARNING_RATE * partialDerivativesWeights.get(i).get(j);
                 weights.get(i).set(j,temp);
             }  
 
@@ -558,7 +586,7 @@ public class Network {
         double newValue = 0;
         for(int i=0; i<partialDerivativesBiases.size(); i++){
             for(int j=0; j<partialDerivativesBiases.get(i).size(); j++){
-                newValue = biases.get(i).get(j) - LEARNING_RATE * partialDerivativesBiases.get(i).get(j);
+                newValue = biases.get(i).get(j) + LEARNING_RATE * partialDerivativesBiases.get(i).get(j);
                 biases.get(i).set(j,newValue);
         }
     }
@@ -583,8 +611,10 @@ public class Network {
                 return logistic(x);
             case 2:
                 return tangent(x);
-            default:
+            case 3:
                 return relu(x);
+            default:
+                return softmax(x);
         }
     }
 
@@ -595,8 +625,10 @@ public class Network {
                 return logistic_prime(x);
             case 2:
                 return tangent_prime(x);
-            default:
+            case 3:
                 return relu_prime(x);
+            default:
+                return softmax_prime(x);
         }
     }
 
@@ -638,6 +670,23 @@ public class Network {
         
     }
 
+    //function that calculates softmax function
+    private double softmax(double x){
+        double sum = 0;
+        for(int i=0; i<10; i++){
+            sum += Math.exp(x);
+        }
+        return Math.exp(x)/sum;
+    }
+
+    //function that calculates the derivative of softmax function
+    public double softmax_prime(double x){
+        double sum = 0;
+        for(int i=0; i<10; i++){
+            sum += Math.exp(x);
+        }
+        return Math.exp(x)*(sum-Math.exp(x))/Math.pow(sum,2);
+    }
 
 
     //find the max index of the outputs 
@@ -761,8 +810,8 @@ public class Network {
         */
 
 
-        int[] H = {2, 2, 2};
-        Network mlp = new Network(2, 3, 0.1, H, 1, 700, 0.01, 1);
+        int[] H = {10, 10, 10};
+        Network mlp = new Network(2, 3, 0.1, H, 2, 700, 0.00000001, 1);
 
         // load the inputs from the file
         mlp.loadInputs("training_data.txt");
@@ -770,6 +819,7 @@ public class Network {
         // train the network
         mlp.gradientDescentAlgorithm();
 
+        
         double x = mlp.run();
         System.out.println("Generalization percentage: " + x + "%");
     }
