@@ -279,7 +279,7 @@ public class Network {
                 System.out.println("Epoch: " + (t+1) + " Total error: " + totalErrors.get(t));
 
                 t++;
-            } while (t < x1List.size() || (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
+            } while (t < x1List.size() && (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
 
         }
 
@@ -338,7 +338,7 @@ public class Network {
 
                 // calculate the total error for the epoch
                 totalErrors.add(calculateTotalError(desiredOutputVectors, actualOutputVectors));
-            } while (t < miniBatchNum || (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
+            } while (t < miniBatchNum && (t < MAX_EPOCHS && totalErrors.get(t-2) - totalErrors.get(t-1) < ERROR_THRESHOLD));
 
 
             // for the last batch of remaining inputs (if any)
@@ -415,7 +415,7 @@ public class Network {
             double new_activation = activationFunction(ACTIVATION_FUNCTION_TYPE, z);
             activations.get(1).set(i, new_activation); // update the table
         }
-
+        
         // calculate the activations of the second hidden layer (H2)
         for (int i = 0; i < NUM_OF_H_NEURONS[1]; i++) {
             // for each neuron
